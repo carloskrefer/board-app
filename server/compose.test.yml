@@ -1,0 +1,24 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER_TEST}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_TEST}
+      POSTGRES_DB: ${POSTGRES_DB_TEST}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER_TEST}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: build
+    environment:
+        ConnectionStrings__Default: "Host=db;Port=5432;Database=${POSTGRES_DB_TEST};Username=${POSTGRES_USER_TEST};Password=${POSTGRES_PASSWORD_TEST}"
+    depends_on:
+      db:
+        condition: service_healthy
+    command: dotnet test

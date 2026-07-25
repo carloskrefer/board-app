@@ -1,0 +1,8 @@
+.env*
+
+# Build
+bin/
+obj/
+
+# VSCode C# Dev Kit Extension
+*.lscache
