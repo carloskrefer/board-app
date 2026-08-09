@@ -1,0 +1,17 @@
+<div class="outer-panel">
+    <app-logo class="logo"/>
+    <div class="g-panel panel">
+        @for(error of loginForm().errors(); track error) {
+            @if (error.message) {
+            <app-banner [message]="error.message" type="error" />
+            }
+        }
+        <form class="inner-panel" [formRoot]="loginForm">
+            <app-email-field [formField]="loginForm.email" />
+            <app-password-field [formField]="loginForm.password" />
+            <app-button label="Log in" type="submit" [isLoading]="loginForm().submitting()" />
+        </form>
+        <app-button label="Sign in" mode="outline" />
+    </div>
+    <app-button class="forgot-button" label="Forgot password" mode="outline" size="small" [borderHidden]="true"/>
+</div>
