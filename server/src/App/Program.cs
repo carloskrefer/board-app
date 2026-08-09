@@ -15,12 +15,23 @@ builder.Services.AddControllers(options => options.ReturnHttpNotAcceptable = tru
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// TODO: Move this to a separate file and add the origin in appsettings.json
+const string corsPolicyName = "Development";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        corsPolicyName, 
+        policy => policy.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod().AllowCredentials()
+    );
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseCors(corsPolicyName);
 }
 
 app.UseMiddleware<TraceIdHeaderMiddleware>();
