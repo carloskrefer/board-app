@@ -1,0 +1,13 @@
+:host {
+    display: block;
+}
+
+.error-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    color: var(--g-error);
+    font-size: 1.2rem;
+    margin-top: 0.4rem;
+    list-style-type: none;
+}

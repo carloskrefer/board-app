@@ -1,0 +1,24 @@
+@keyframes rotation {
+	from { transform: rotate(0deg); }
+	to { transform: rotate(360deg); }
+}
+
+.image {
+    animation: rotation 1s linear infinite;
+}
+
+.primary {
+    fill: var(--g-primary);
+}
+
+.secondary {
+    fill: var(--g-secondary);
+}
+
+.on-primary {
+    fill: var(--g-on-primary);
+}
+
+.on-secondary {
+    fill: var(--g-on-secondary);
+}

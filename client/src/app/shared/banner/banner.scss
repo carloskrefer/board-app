@@ -1,0 +1,38 @@
+:host {
+    display: block;
+}
+
+.banner {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.8rem;
+    border: 1px solid var(--g-info);
+    font-size: 1.4rem;
+    border-radius: 4px;
+    line-height: 1.8rem;
+}
+
+.error {
+    color: var(--g-error);
+    background-color: color-mix(in srgb, var(--g-error) 5%, white);
+    border-color: var(--g-error);
+}
+
+.warning {
+    color: var(--g-error);
+    background-color: color-mix(in srgb, var(--g-error) 5%, white);
+    border-color: var(--g-error);
+}
+
+.success {
+    color: var(--g-success);
+    background-color: color-mix(in srgb, var(--g-success) 5%, white);
+    border-color: var(--g-success);
+}
+
+.info {
+    color: var(--g-info);
+    background-color: color-mix(in srgb, var(--g-info) 5%, white);
+    border-color: var(--g-info);
+}

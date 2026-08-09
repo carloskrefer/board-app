@@ -1,0 +1,67 @@
+:host {
+    --error-color: deeppink;
+    --main-color: var(--error-color);
+    --on-main-color: var(--error-color);
+}
+
+.primary-main-color {
+    --main-color: var(--g-primary);
+    --on-main-color: var(--g-on-primary);
+}
+
+.secondary-main-color {
+    --main-color: var(--g-secondary);
+    --on-main-color: var(--g-on-secondary);
+}
+
+.fill {
+    background-color: var(--main-color);
+    color: var(--on-main-color);
+    border: none;
+}
+
+.outline {
+    background-color: transparent;
+    color: var(--main-color);
+    border: 1px solid var(--main-color);
+}
+
+.button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 4.8rem;
+    width: 100%;
+    border-radius: 4px;
+    font-size: inherit;
+}
+
+.fill:hover {
+    filter: brightness(1.1);
+}
+
+.outline:hover {
+    background-color: color-mix(in srgb, var(--main-color) 10%, white);
+}
+
+.button:active {
+    filter: brightness(0.9);
+}
+
+.outline:active {
+    background-color: color-mix(in srgb, var(--main-color) 10%, white);
+}
+
+.small {
+    font-size: 1.2rem;
+}
+
+.border-hidden {
+    border: none;
+}
+
+.border-hidden:hover {
+    text-decoration: underline;
+    background-color: transparent;
+}

@@ -1,0 +1,7 @@
+<app-label for="email" text="E-mail" />
+<input type="email" id="email" class="input g-form-input" autocomplete="email" [formField]="formField()"
+    [class.input-error]="showError()" />
+@if (showError())
+{
+<app-error-list [formField]="formField()" />
+}

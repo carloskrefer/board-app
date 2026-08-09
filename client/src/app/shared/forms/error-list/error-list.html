@@ -1,0 +1,5 @@
+<ul class="error-list">
+    @for (error of formField()().errors(); track error) {
+    <li>{{ error.message }}</li>
+    }
+</ul>

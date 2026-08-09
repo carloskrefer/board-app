@@ -1,0 +1,12 @@
+@if(isVisible())
+{
+<button type="button" class="button" [class.fade-left]="isInsideInput()" (click)="isVisible.set(false)">
+    <span class="visible-icon material-symbols-outlined">visibility</span>
+</button>
+} 
+@else 
+{
+<button type="button" class="button" [class.fade-left]="isInsideInput()" (click)="isVisible.set(true)">
+    <span class="invisible-icon material-symbols-outlined">visibility_off</span>
+</button>
+}

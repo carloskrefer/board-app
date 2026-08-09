@@ -1,0 +1,26 @@
+:host {
+    display: block;
+    --color: var(--g-gray-dark);
+}
+
+.button {
+    display: block;
+    cursor: pointer;
+    border: none;
+    color: var(--color);
+    background-color: transparent;
+    line-height: 0;
+}
+
+.button:hover {
+    color: color-mix(in srgb, var(--color), white 30%);
+}
+
+.button:active {
+    color: color-mix(in srgb, var(--color), black 30%);
+}
+
+.fade-left {
+    background-image: linear-gradient(to right, transparent, var(--g-form-field-background-color) 35%);
+    padding-left: 1.6rem;
+}

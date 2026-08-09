@@ -1,0 +1,6 @@
+<button class="button" [class]="classes()" [type]="type()">
+    @if (isLoading()) {
+    <app-spinner [color]="spinnerColor()" />
+    }
+    {{ label() }}
+</button>
