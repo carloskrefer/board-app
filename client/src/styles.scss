@@ -11,5 +11,19 @@ html {
 }
 
 body {
-    min-height: 100%;
+    height: 100%;
+    font-size: 1.6rem;
+}
+
+button {
+    font-size: inherit;
+}
+
+.button:hover {
+    cursor: pointer;
+}
+
+.g-page {
+    display: block;
+    height: 100%;
 }

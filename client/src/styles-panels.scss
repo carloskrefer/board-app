@@ -1,0 +1,9 @@
+html {
+    --g-panel-background: white;
+}
+
+.g-panel {
+    background-color: var(--g-panel-background);
+    border-radius: 4px;
+    padding: 1.6rem;
+}

@@ -1,0 +1,15 @@
+html {
+    --g-form-field-border-color: var(--g-gray-dark);
+    --g-form-field-background-color: white;
+
+    --g-form-input-padding: 0.8rem;
+}
+
+.g-form-input {
+    height: 4.8rem;
+    border: 1px solid var(--g-form-field-border-color);
+    border-radius: 4px;
+    font-size: 1.4rem;
+    padding: var(--g-form-input-padding);
+    background-color: var(--g-form-field-background-color);
+}
