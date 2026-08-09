@@ -91,6 +91,18 @@ public class LogInTests : DefaultIntegrationTests<AuthDbContext>
     }
 
     [Fact]
+    public async Task Should_Respond_With_BadRequest_And_Generic_Credentials_Error_When_Password_Format_Is_Invalid()
+    {
+        var signInRequest = new SignInRequestBuilder().Build();
+        await _client.PostAsJsonAsync(_signInUrl, signInRequest);
+
+        var body = new LogInRequest(Email: signInRequest.Email, Password: "invalidformat");
+        var response = await _client.PostAsJsonAsync(_loginUrl, body);
+
+        await BadRequestAssertions.AssertGeneralResponse(response, _loginUrl, LogInResponseErrors.Credentials);
+    }
+
+    [Fact]
     public async Task Should_Respond_With_BadRequest_When_Email_Format_Is_Invalid()
     {
         var body = new LogInRequest(Email: "invalid-email", Password: "AnyPassword123!");
