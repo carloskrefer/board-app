@@ -29,8 +29,7 @@ public static class LogInRequestExtensions
 
         if (error.HasSameCodeId(PasswordErrors.Id) && !request.Password.Any())
             builder.AddError(LogInResponseErrors.PasswordEmpty(request.Password));
-
-        if (error.HasSameCodeId(PasswordErrors.Id) || error == UserErrors.NotFound || error == UserErrors.IncorrectPassword)
+        else if (error.HasSameCodeId(PasswordErrors.Id) || error == UserErrors.NotFound || error == UserErrors.IncorrectPassword)
             builder.AddError(LogInResponseErrors.Credentials);
         
         return builder.Build();
