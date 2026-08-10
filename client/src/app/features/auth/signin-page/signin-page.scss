@@ -1,0 +1,30 @@
+:host {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    background-image: linear-gradient(#D5FFDD, #CDF2FF);
+}
+
+.outer-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 300px;
+}
+
+.logo {
+    margin-bottom: 16px;
+}
+
+.panel,
+.forgot-button {
+    width: 100%;
+}
+
+.panel,
+.inner-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}

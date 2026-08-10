@@ -11,7 +11,7 @@
             <app-password-field [formField]="loginForm.password" />
             <app-button label="Log in" type="submit" [isLoading]="loginForm().submitting()" />
         </form>
-        <app-button label="Sign in" mode="outline" />
+        <app-button label="Sign in" mode="outline" (click)="navigateToSignInPage()" />
     </div>
     <app-button class="forgot-button" label="Forgot password" mode="outline" size="small" [borderHidden]="true"/>
 </div>

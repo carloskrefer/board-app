@@ -12,6 +12,7 @@ import { VisibilityButton } from '../../../buttons/visibility-button/visibility-
 })
 export class PasswordField {
     formField = input.required<FieldTree<string>>();
+    label = input('Password');
 
     showError = computed(() => {
         const touched = this.formField()().touched();

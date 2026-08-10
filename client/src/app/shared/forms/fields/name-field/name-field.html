@@ -1,0 +1,7 @@
+<app-label for="name" text="Name" />
+<input type="text" id="name" class="input g-form-input" autocomplete="name" [formField]="formField()"
+    [class.input-error]="showError()" />
+@if (showError())
+{
+<app-error-list [formField]="formField()" />
+}

@@ -9,6 +9,7 @@ import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
 import { isApiProblemDetails } from '../../../core/api/api-problem-details/api-problem-details.helper';
 import { Banner } from '../../../shared/banner/banner';
 import { Button } from '../../../shared/buttons/button/button';
+import { Router } from '@angular/router';
 
 class Login {
     email = '';
@@ -28,6 +29,7 @@ const LOGIN_INITIAL: Login = {
 })
 export class LoginPage {
     auth = inject(AuthService);
+    router = inject(Router)
     
     loginModel = signal<Login>(LOGIN_INITIAL);
 
@@ -53,9 +55,6 @@ export class LoginPage {
         if (errors.length)
             errors[0].fieldTree().focusBoundControl();
     }
-
-    // TODO: A cada 3s mudar o valor do email, setar ele, pra ver se o angular atualiza ele no template, pois o signal
-    // só é feito () no template do filho. Se funfar, anotar isso no docs.
 
     async login(): Promise<TreeValidationResult<ValidationError.WithOptionalFieldTree>> {
         try {
@@ -83,5 +82,9 @@ export class LoginPage {
 
             return { kind: 'serverError', message: 'An unkown error has occurred. Please try again later.' };
         }
+    }
+
+    navigateToSignInPage() {
+        this.router.navigate(['/signin']);
     }
 }
