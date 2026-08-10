@@ -57,6 +57,29 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
     }
 
     [Fact]
+    public async Task Should_Respond_With_BadRequest_When_Email_Already_Registered()
+    {
+        var email = "joshua@example.com";
+        var requestBody = new SignInRequest(email, "Joshua", "ValidPassword123!");
+        var response = await _client.PostAsJsonAsync(_url, requestBody);
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+
+        requestBody = new SignInRequest(email, "Joshua II", "AnotherValidPassword123!");
+        response = await _client.PostAsJsonAsync(_url, requestBody);
+
+        List<DetailedResponseError> expectedErrors = [
+            new(
+                generalError: EmailResponseErrors.AlreadyRegistered,
+                field: nameof(requestBody.Email).FromPascalCaseToCamelCase(),
+                location: ErrorLocationEnum.Body,
+                rejectedValue: requestBody.Email)
+        ];
+
+        await BadRequestAssertions.AssertDetailedResponse(response, _url, expectedErrors);
+    }
+
+    [Fact]
     public async Task Should_Respond_With_BadRequest_When_Name_Is_Empty()
     {
         var requestBody = new SignInRequest("test@example.com", "", "ValidPassword123!");

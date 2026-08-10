@@ -1,5 +1,6 @@
 using Auth.Api.Controllers;
 using Auth.Application.UseCases;
+using Auth.Domain.Entities;
 using Auth.Domain.ValueObjects;
 using Core.Api.Builders;
 using Core.Api.DTOs.Auth.User;
@@ -25,6 +26,8 @@ public static class SignInRequestExtensions
 
         if (error == EmailErrors.Format)
             builder.AddError(SignInResponseErrors.EmailFormat(request.Email));
+        if (error == UserErrors.EmailAlreadyExists)
+            builder.AddError(SignInResponseErrors.EmailAlreadyRegistered(request.Email));
         if (error == NameErrors.Empty)
             builder.AddError(SignInResponseErrors.NameEmpty(request.Name));
         if (error == NameErrors.TooLong)

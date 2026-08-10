@@ -8,6 +8,14 @@ public record SignInResponse(Guid UserId);
 
 public static class SignInResponseErrors
 {
+    public static DetailedResponseError EmailAlreadyRegistered(string rejectedValue) =>
+        new(
+            EmailResponseErrors.AlreadyRegistered,
+            nameof(SignInRequest.Email).FromPascalCaseToCamelCase(),
+            ErrorLocationEnum.Body,
+            rejectedValue
+        );
+
     public static DetailedResponseError EmailFormat(string rejectedValue) =>
         new(
             EmailResponseErrors.Format,
