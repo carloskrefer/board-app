@@ -18,7 +18,7 @@ public static class SignInResponseErrors
 
     public static DetailedResponseError NameEmpty(string rejectedValue) =>
         new(
-            TextResponseErrors.Empty,
+            TextResponseErrors.Empty("Name"),
             nameof(SignInRequest.Name).FromPascalCaseToCamelCase(),
             ErrorLocationEnum.Body,
             rejectedValue
@@ -26,7 +26,7 @@ public static class SignInResponseErrors
 
     public static DetailedResponseError NameTooLong(string rejectedValue) =>
         new(
-            TextResponseErrors.TooLong(100),
+            TextResponseErrors.TooLong(100, "Name"),
             nameof(SignInRequest.Name).FromPascalCaseToCamelCase(),
             ErrorLocationEnum.Body,
             rejectedValue
@@ -34,7 +34,7 @@ public static class SignInResponseErrors
 
     public static DetailedResponseError NameOnlySpecialCharacters(string rejectedValue) =>
         new(
-            TextResponseErrors.OnlySpecialCharacters,
+            TextResponseErrors.OnlySpecialCharacters("Name"),
             nameof(SignInRequest.Name).FromPascalCaseToCamelCase(),
             ErrorLocationEnum.Body,
             rejectedValue
@@ -42,8 +42,7 @@ public static class SignInResponseErrors
 
     public static DetailedResponseError PasswordLength(string rejectedValue) =>
         new(
-            $"{nameof(SignInRequest.Password).ToUpper()}.LENGTH", 
-            "Password must be between 6 and 100 characters.",
+            TextResponseErrors.BetweenRange(6, 100, "Password"),
             nameof(SignInRequest.Password).FromPascalCaseToCamelCase(),
             ErrorLocationEnum.Body,
             rejectedValue
@@ -51,7 +50,7 @@ public static class SignInResponseErrors
 
     public static DetailedResponseError PasswordSpecialCharacters(string rejectedValue) =>
         new(
-            $"{nameof(SignInRequest.Password).ToUpper()}.SPECIAL_CHARACTERS", 
+            "SPECIAL_CHARACTERS", 
             "Password must contain at least one special character. Examples: !?@#$%^&*()-+.",
             nameof(SignInRequest.Password).FromPascalCaseToCamelCase(),
             ErrorLocationEnum.Body,
@@ -60,7 +59,7 @@ public static class SignInResponseErrors
 
     public static DetailedResponseError PasswordUpperAndLowerCase(string rejectedValue) =>
         new(
-            $"{nameof(SignInRequest.Password).ToUpper()}.UPPER_AND_LOWER_CASE", 
+            "UPPER_AND_LOWER_CASE", 
             "Password must contain at least one uppercase and one lowercase letter.",
             nameof(SignInRequest.Password).FromPascalCaseToCamelCase(),
             ErrorLocationEnum.Body,
@@ -69,7 +68,7 @@ public static class SignInResponseErrors
 
     public static DetailedResponseError PasswordNumber(string rejectedValue) =>
         new(
-            $"{nameof(SignInRequest.Password).ToUpper()}.NUMBER", 
+            "NUMBERS", 
             "Password must contain at least one number.",
             nameof(SignInRequest.Password).FromPascalCaseToCamelCase(),
             ErrorLocationEnum.Body,

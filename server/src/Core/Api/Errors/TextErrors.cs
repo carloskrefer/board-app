@@ -1,20 +1,24 @@
 namespace Core.Api.Errors;
 
 public static class TextResponseErrors
-{    
-    public static readonly string Id = "TEXT";
-    public static GeneralResponseError Empty = 
+{
+    public static GeneralResponseError Empty(string textType = "Text") => 
         new(
-            $"{Id}.EMPTY", 
-            "Name is empty.");
+            $"EMPTY", 
+            $"{textType} is empty.");
 
-    public static GeneralResponseError TooLong(int maxLength) => 
+    public static GeneralResponseError TooLong(int maxLength, string textType = "Text") => 
         new(
-            $"{Id}.TOO_LONG", 
-            $"Name should have less than {maxLength} characters.");
+            $"TOO_LONG", 
+            $"{textType} should have less than {maxLength} characters.");
 
-    public static GeneralResponseError OnlySpecialCharacters = 
+    public static GeneralResponseError BetweenRange(int minLength, int maxLength, string textType = "Text") => 
         new(
-            $"{Id}.ONLY_SPECIAL_CHARACTERS", 
-            "Name should not only have special characters.");
+            $"BETWEEN_RANGE", 
+            $"{textType} should have between {minLength} and {maxLength} characters.");
+
+    public static GeneralResponseError OnlySpecialCharacters(string textType = "Text") => 
+        new(
+            $"ONLY_SPECIAL_CHARACTERS", 
+            $"{textType} should not only have special characters.");
 }

@@ -10,6 +10,7 @@ using Core.String.Extensions;
 using TestsCommon.Assertions;
 using TestsCommon.Tests;
 using Core.Api.DTOs.Auth.User;
+using System.Net;
 
 namespace Auth.Api.Tests.IntegrationTests.UserControllerTests;
 
@@ -63,7 +64,7 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
 
         List<DetailedResponseError> expectedErrors = [
             new(
-                generalError: TextResponseErrors.Empty,
+                generalError: TextResponseErrors.Empty("Name"),
                 field: nameof(requestBody.Name).FromPascalCaseToCamelCase(),
                 location: ErrorLocationEnum.Body,
                 rejectedValue: requestBody.Name)
@@ -80,7 +81,7 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
 
         List<DetailedResponseError> expectedErrors = [
             new(
-                generalError: TextResponseErrors.TooLong(100),
+                generalError: TextResponseErrors.TooLong(100, "Name"),
                 field: nameof(requestBody.Name).FromPascalCaseToCamelCase(),
                 location: ErrorLocationEnum.Body,
                 rejectedValue: requestBody.Name)
@@ -97,7 +98,7 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
 
         List<DetailedResponseError> expectedErrors = [
             new(
-                generalError: TextResponseErrors.OnlySpecialCharacters,
+                generalError: TextResponseErrors.OnlySpecialCharacters("Name"),
                 field: nameof(requestBody.Name).FromPascalCaseToCamelCase(),
                 location: ErrorLocationEnum.Body,
                 rejectedValue: requestBody.Name)
@@ -114,8 +115,7 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
 
         List<DetailedResponseError> expectedErrors = [
             new(
-                code: $"{nameof(SignInRequest.Password).ToUpper()}.LENGTH",
-                message: "Password must be between 6 and 100 characters.",
+                TextResponseErrors.BetweenRange(6, 100, "Password"),
                 field: nameof(requestBody.Password).FromPascalCaseToCamelCase(),
                 location: ErrorLocationEnum.Body,
                 rejectedValue: requestBody.Password)
@@ -132,8 +132,7 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
 
         List<DetailedResponseError> expectedErrors = [
             new(
-                code: $"{nameof(SignInRequest.Password).ToUpper()}.LENGTH",
-                message: "Password must be between 6 and 100 characters.",
+                generalError: TextResponseErrors.BetweenRange(6, 100, "Password"),
                 field: nameof(requestBody.Password).FromPascalCaseToCamelCase(),
                 location: ErrorLocationEnum.Body,
                 rejectedValue: requestBody.Password)
@@ -150,7 +149,7 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
 
         List<DetailedResponseError> expectedErrors = [
             new(
-                code: $"{nameof(SignInRequest.Password).ToUpper()}.SPECIAL_CHARACTERS",
+                code: "SPECIAL_CHARACTERS",
                 message: "Password must contain at least one special character. Examples: !?@#$%^&*()-+.",
                 field: nameof(requestBody.Password).FromPascalCaseToCamelCase(),
                 location: ErrorLocationEnum.Body,
@@ -168,7 +167,7 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
 
         List<DetailedResponseError> expectedErrors = [
             new(
-                code: $"{nameof(SignInRequest.Password).ToUpper()}.UPPER_AND_LOWER_CASE",
+                code: "UPPER_AND_LOWER_CASE",
                 message: "Password must contain at least one uppercase and one lowercase letter.",
                 field: nameof(requestBody.Password).FromPascalCaseToCamelCase(),
                 location: ErrorLocationEnum.Body,
@@ -186,7 +185,7 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
 
         List<DetailedResponseError> expectedErrors = [
             new(
-                code: $"{nameof(SignInRequest.Password).ToUpper()}.UPPER_AND_LOWER_CASE",
+                code: "UPPER_AND_LOWER_CASE",
                 message: "Password must contain at least one uppercase and one lowercase letter.",
                 field: nameof(requestBody.Password).FromPascalCaseToCamelCase(),
                 location: ErrorLocationEnum.Body,
@@ -204,7 +203,7 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
 
         List<DetailedResponseError> expectedErrors = [
             new(
-                code: $"{nameof(SignInRequest.Password).ToUpper()}.NUMBER", 
+                code: "NUMBERS", 
                 message: "Password must contain at least one number.",
                 field: nameof(requestBody.Password).FromPascalCaseToCamelCase(),
                 location: ErrorLocationEnum.Body,
