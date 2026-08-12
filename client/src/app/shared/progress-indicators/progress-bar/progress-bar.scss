@@ -1,0 +1,47 @@
+:host {
+    display: block;
+}
+
+.bar {
+    height: 4px;
+    transition-property: width;
+    transition-timing-function: linear;
+    animation-name: color-change;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+    animation-direction: alternate-reverse;
+}
+
+.default {
+    --first-color: #CACACA;
+    --second-color: #e0e0e0; 
+}
+
+.error {
+    --first-color: color-mix(in srgb, var(--g-error) 30%, white);
+    --second-color: color-mix(in srgb, var(--g-error) 15%, white);
+}
+
+.warning {
+    --first-color: color-mix(in srgb, var(--g-warning) 30%, white);
+    --second-color: color-mix(in srgb, var(--g-warning) 15%, white);
+}
+
+.success {
+    --first-color: color-mix(in srgb, var(--g-success) 30%, white);
+    --second-color: color-mix(in srgb, var(--g-success) 15%, white);
+}
+
+.info {
+    --first-color: color-mix(in srgb, var(--g-info) 30%, white);
+    --second-color: color-mix(in srgb, var(--g-info) 15%, white);
+}
+
+@keyframes color-change {
+    from {
+        background-color: var(--first-color);
+    }
+    to {
+        background-color: var(--second-color);
+    }
+}
