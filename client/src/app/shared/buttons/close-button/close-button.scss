@@ -1,0 +1,30 @@
+:host {
+    display: block;
+    position: relative;
+    width: 24px;
+    height: 24px;
+}
+
+.button {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border: none;
+    border-radius: 50%;
+    background-color: transparent;
+    color: inherit;
+}
+
+.button:hover {
+    background-color: var(--g-gray-lightest);
+    border-radius: 50%;
+}
+
+.button:active {
+    background-color: var(--g-gray-lighter);
+}
