@@ -11,6 +11,7 @@ import { Banner } from '../../../shared/banner/banner';
 import { Button } from '../../../shared/buttons/button/button';
 import { NameField } from '../../../shared/forms/fields/name-field/name-field';
 import { Router } from '@angular/router';
+import { Snackbar, SnackbarService, SnackbarTypeEnum } from '../../../core/snackbar/snackbar.service';
 
 class Signin {
     name = '';
@@ -35,6 +36,7 @@ const SIGNIN_INITIAL: Signin = {
 export class SigninPage {
     auth = inject(AuthService);
     router = inject(Router);
+    snackbar = inject(SnackbarService);
     
     signinModel = signal<Signin>(SIGNIN_INITIAL);
 
@@ -100,13 +102,19 @@ export class SigninPage {
                 }
             }
 
-            console.log("got here")
-
             return { kind: 'serverError', message: 'An unkown error has occurred. Please try again later.' };
         }
     }
 
     navigateToLoginPage() {
+        this.addAccountCreatedSnackbar();
         this.router.navigate(['/login']);
+    }
+
+    addAccountCreatedSnackbar() {
+        let snack = new Snackbar();
+        snack.type = SnackbarTypeEnum.Success;
+        snack.text = 'Account created successfully!';
+        this.snackbar.addSnackbar(snack);
     }
 }
