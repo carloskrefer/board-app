@@ -1,0 +1,10 @@
+:host {
+    position: relative;
+}
+
+.snackbar-list {
+    position: absolute;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+}

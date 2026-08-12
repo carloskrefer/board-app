@@ -1,0 +1,3 @@
+@for(snackbar of service.snackbars(); track snackbar.id) {
+    <app-snackbar-item [id]="snackbar.id" (close)="service.removeSnackbar(snackbar.id)" />
+}
