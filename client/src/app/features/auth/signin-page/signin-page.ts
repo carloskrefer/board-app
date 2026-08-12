@@ -80,6 +80,7 @@ export class SigninPage {
     async signin(): Promise<TreeValidationResult<ValidationError.WithOptionalFieldTree>> {
         try {
             await firstValueFrom(this.auth.signin(this.signinModel()));
+            this.addAccountCreatedSnackbar();
             this.navigateToLoginPage();
             return;
         } catch (response) {
@@ -107,7 +108,6 @@ export class SigninPage {
     }
 
     navigateToLoginPage() {
-        this.addAccountCreatedSnackbar();
         this.router.navigate(['/login']);
     }
 
