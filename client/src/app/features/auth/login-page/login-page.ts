@@ -1,26 +1,16 @@
 import { Component, inject, signal } from '@angular/core';
 import { Logo } from '../../../shared/symbols/logo/logo';
-import { email, FieldTree, form, FormRoot, required, TreeValidationResult, ValidationError } from '@angular/forms/signals';
+import { apply, form, FormRoot, TreeValidationResult, ValidationError } from '@angular/forms/signals';
 import { EmailField } from '../../../shared/forms/fields/email-field/email-field';
 import { PasswordField } from '../../../shared/forms/fields/password-field/password-field';
 import { AuthService } from '../../../core/auth/auth-service/auth-service';
 import { firstValueFrom } from 'rxjs';
-import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
-import { isApiProblemDetails } from '../../../core/api/api-problem-details/api-problem-details.helper';
 import { Banner } from '../../../shared/banner/banner';
 import { Button } from '../../../shared/buttons/button/button';
 import { Router } from '@angular/router';
-import { unknown } from '../../../core/form/validation-errors';
-
-class Login {
-    email = '';
-    password = '';
-}
-
-const LOGIN_INITIAL: Login = {
-    email: '',
-    password: '',
-};
+import { Login, LOGIN_INITIAL } from './login-page.models';
+import { focusOnFirstInvalidField } from '../../../core/form/focus';
+import { logInSchema, toValidationError } from './login-page.validation';
 
 @Component({
     selector: 'app-login-page',
@@ -36,52 +26,22 @@ export class LoginPage {
 
     loginForm = form<Login>(
         this.loginModel,
-        path => {
-            email(path.email, { message: 'Expected pattern: user@domain.com' });
-            required(path.email, { message: 'Email is required' });
-            required(path.password, { message: 'Password is required' });
-        },
+        path => apply(path, logInSchema),
         {
             submission: {
                 action: this.login.bind(this),
                 ignoreValidators: 'pending',
-                onInvalid: (field) => this.focusOnFirstInvalidField(field),
+                onInvalid: (field) => focusOnFirstInvalidField(field),
             }
         }
     );
-
-    focusOnFirstInvalidField(field: FieldTree<Login>): void {
-        const errors = field().errorSummary();
-
-        if (errors.length)
-            errors[0].fieldTree().focusBoundControl();
-    }
 
     async login(): Promise<TreeValidationResult<ValidationError.WithOptionalFieldTree>> {
         try {
             await firstValueFrom(this.auth.login(this.loginModel()));
             return;
         } catch (response) {
-            const isCorrectType = response instanceof HttpErrorResponse && isApiProblemDetails(response.error);
-            if (!isCorrectType) 
-                return unknown;
-
-            var body = response.error;
-            
-            if (response.status == HttpStatusCode.BadRequest) {
-                if (body.errors.length) {
-                    return body.errors.map(error => {
-                        switch (error.field) {
-                            case 'email': return { kind: 'emailError', message: error.message, fieldTree: this.loginForm.email };
-                            case 'password': return { kind: 'passwordError', message: error.message, fieldTree: this.loginForm.password };
-                            default: return { kind: 'generalError', message: error.message };
-                        }
-                    });
-                }
-                return { kind: 'credentialsError', message: body.detail };
-            }
-
-            return unknown;
+            return toValidationError(response, this.loginForm);
         }
     }
 
