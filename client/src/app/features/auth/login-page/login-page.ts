@@ -10,6 +10,7 @@ import { isApiProblemDetails } from '../../../core/api/api-problem-details/api-p
 import { Banner } from '../../../shared/banner/banner';
 import { Button } from '../../../shared/buttons/button/button';
 import { Router } from '@angular/router';
+import { unknown } from '../../../core/form/validation-errors';
 
 class Login {
     email = '';
@@ -63,7 +64,7 @@ export class LoginPage {
         } catch (response) {
             const isCorrectType = response instanceof HttpErrorResponse && isApiProblemDetails(response.error);
             if (!isCorrectType) 
-                return { kind: 'unkown', message: 'An unkown error has occurred. Please try again later.' };
+                return unknown;
 
             var body = response.error;
             
@@ -80,7 +81,7 @@ export class LoginPage {
                 return { kind: 'credentialsError', message: body.detail };
             }
 
-            return { kind: 'serverError', message: 'An unkown error has occurred. Please try again later.' };
+            return unknown;
         }
     }
 
