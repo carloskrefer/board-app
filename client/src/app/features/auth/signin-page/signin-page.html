@@ -1,18 +1,13 @@
-<div class="outer-panel">
-    <app-logo class="logo"/>
-    <div class="g-panel panel">
-        @for(error of signinForm().errors(); track error) {
-            @if (error.message) {
-            <app-banner [message]="error.message" type="error" />
-            }
-        }
-        <form class="inner-panel" [formRoot]="signinForm">
-            <app-name-field [formField]="signinForm.name" />
-            <app-email-field [formField]="signinForm.email" />
-            <app-password-field [formField]="signinForm.password" />
-            <app-password-field label="Confirm password" [formField]="signinForm.passwordConfirm" />
-            <app-button label="Create account" type="submit" [isLoading]="signinForm().submitting()" />
-        </form>
-        <app-button label="Cancel" mode="outline" (click)="navigateToLoginPage()" />
-    </div>
-</div>
+@for(error of signinForm().errors(); track error) {
+@if (error.message) {
+<app-banner [message]="error.message" type="error" />
+}
+}
+<form class="form" [formRoot]="signinForm">
+    <app-name-field [formField]="signinForm.name" />
+    <app-email-field [formField]="signinForm.email" />
+    <app-password-field [formField]="signinForm.password" />
+    <app-password-field label="Confirm password" [formField]="signinForm.passwordConfirm" />
+    <app-button label="Create account" type="submit" [isLoading]="signinForm().submitting()" />
+</form>
+<app-button label="Cancel" mode="outline" (click)="navigateToLoginPage()" />

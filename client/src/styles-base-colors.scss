@@ -16,4 +16,12 @@ html {
     --g-warning: rgb(216, 148, 0);
     --g-info: rgb(46, 112, 255);
     --g-success: rgb(0, 173, 0);
+
+    --g-gradient-background-image: linear-gradient(
+        color-mix(in srgb, var(--g-primary) 25%, white),
+        color-mix(in srgb, var(--g-secondary) 15%, white));
+}
+
+.g-gradient-background-image {
+    background-image: var(--g-gradient-background-image);
 }

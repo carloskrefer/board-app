@@ -25,7 +25,7 @@ export const signInSchema = schema<Signin>((path) => {
 });
 
 export function toValidationError(
-    response: unknown, 
+    response: unknown,
     form: FieldTree<Signin>): TreeValidationResult<ValidationError.WithOptionalFieldTree> {
     const isCorrectType = response instanceof HttpErrorResponse && isApiProblemDetails(response.error);
 
@@ -34,17 +34,16 @@ export function toValidationError(
 
     var body = response.error;
 
-    if (response.status == HttpStatusCode.BadRequest) {
-        if (body.errors.length) {
-            return body.errors.map(error => {
-                switch (error.field) {
-                    case 'name': return { kind: 'nameError', message: error.message, fieldTree: form.name };
-                    case 'email': return { kind: 'emailError', message: error.message, fieldTree: form.email };
-                    case 'password': return { kind: 'passwordError', message: error.message, fieldTree: form.password };
-                    default: return { kind: 'generalError', message: error.message };
-                }
-            });
-        }
+    if (response.status == HttpStatusCode.BadRequest
+        && body.errors.length) {
+        return body.errors.map(error => {
+            switch (error.field) {
+                case 'name': return { kind: 'nameError', message: error.message, fieldTree: form.name };
+                case 'email': return { kind: 'emailError', message: error.message, fieldTree: form.email };
+                case 'password': return { kind: 'passwordError', message: error.message, fieldTree: form.password };
+                default: return { kind: 'generalError', message: error.message };
+            }
+        });
     }
 
     return unknown;

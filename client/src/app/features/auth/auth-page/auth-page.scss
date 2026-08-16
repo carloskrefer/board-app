@@ -1,0 +1,12 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    background-image: var(--g-gradient-background-image);
+}
+
+.logo {
+    margin-bottom: var(--g-form-item-gap);
+}

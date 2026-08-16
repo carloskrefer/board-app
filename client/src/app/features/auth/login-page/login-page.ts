@@ -1,5 +1,4 @@
 import { Component, inject, signal } from '@angular/core';
-import { Logo } from '../../../shared/symbols/logo/logo';
 import { apply, form, FormRoot, TreeValidationResult, ValidationError } from '@angular/forms/signals';
 import { EmailField } from '../../../shared/forms/fields/email-field/email-field';
 import { PasswordField } from '../../../shared/forms/fields/password-field/password-field';
@@ -14,7 +13,7 @@ import { logInSchema, toValidationError } from './login-page.validation';
 
 @Component({
     selector: 'app-login-page',
-    imports: [Logo, EmailField, PasswordField, FormRoot, Button, Banner],
+    imports: [EmailField, PasswordField, FormRoot, Button, Banner],
     templateUrl: './login-page.html',
     styleUrl: './login-page.scss',
 })
@@ -46,6 +45,6 @@ export class LoginPage {
     }
 
     navigateToSignInPage() {
-        this.router.navigate(['/signin']);
+        this.router.navigate(['/auth/signin']);
     }
 }

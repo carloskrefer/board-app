@@ -1,0 +1,8 @@
+<app-logo class="logo" />
+<div class="g-panel g-panel-width-small">
+    <router-outlet (activate)="onActivate($event)" (deactivate)="isLoginPage.set(false)" (attach)="onActivate($event)"
+        (detach)="isLoginPage.set(false)" />
+</div>
+@if (isLoginPage()) {
+<app-button class="forgot-button" label="Forgot password" mode="outline" size="small" [borderHidden]="true" />
+}
