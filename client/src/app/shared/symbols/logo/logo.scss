@@ -1,3 +1,11 @@
 :host {
     width: 150px;
 }
+
+.primary-color {
+    fill: var(--g-primary);
+}
+
+.gray-color {
+    fill: var(--g-gray-medium);
+}
