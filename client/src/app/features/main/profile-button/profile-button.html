@@ -1,0 +1,6 @@
+<app-icon-button icon="account_circle" class="gray" (click)="toggleOptionsVisibility()" />
+@if(isOptionsVisible()) {
+<div class="options-container" animate.enter="g-animation-fade-in" animate.leave="g-animation-fade-out">
+    <app-profile-options class="options" (close)="isOptionsVisible.set(false)" (logout)="logout()" />
+</div>
+}
