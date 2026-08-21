@@ -2,8 +2,21 @@ import { Routes } from '@angular/router';
 import { LoginPage } from './features/auth/login-page/login-page';
 import { SigninPage } from './features/auth/signin-page/signin-page';
 import { AuthPage } from './features/auth/auth-page/auth-page';
+import { MainPage } from './features/main/main-page/main-page';
+import { BoardsPage } from './features/boards/boards-page/boards-page';
 
 export const routes: Routes = [
+    {
+        path: '',
+        component: MainPage,
+        children: [
+            {
+                path: 'boards',
+                component: BoardsPage,
+                title: 'Boards - BoardApp',
+            }
+        ]
+    },
     {
         path: 'auth',
         component: AuthPage,
@@ -21,8 +34,8 @@ export const routes: Routes = [
         ],
     },
     // TODO: Create a 404 page and redirect to it instead of redirecting to login page
-    { 
-        path: '**', 
-        redirectTo: 'auth/login' 
+    {
+        path: '**',
+        redirectTo: 'auth/login'
     },
 ];
