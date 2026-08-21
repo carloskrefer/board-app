@@ -1,0 +1,31 @@
+.g-animation-fade-in {
+    animation: g-fade-in 150ms ease;
+}
+
+.g-animation-fade-out {
+    animation: g-fade-out 150ms ease;
+}
+
+@keyframes g-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes g-fade-out {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+}
