@@ -7,5 +7,5 @@ import { Component, input } from '@angular/core';
   styleUrl: './spinner.scss',
 })
 export class Spinner {
-    color = input<'primary' | 'on-primary' | 'secondary' | 'on-secondary'>('primary');
+    color = input<'primary' | 'on-primary' | 'secondary' | 'on-secondary' | 'error'>('primary');
 }
