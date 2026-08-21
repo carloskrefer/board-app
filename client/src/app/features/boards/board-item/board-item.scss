@@ -1,0 +1,21 @@
+:host {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.texts {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.name {
+    font-size: 1.6rem;
+    color: var(--g-gray-darkest);
+}
+
+.status {
+    font-size: 1.4rem;
+    color: var(--g-gray-light);
+}

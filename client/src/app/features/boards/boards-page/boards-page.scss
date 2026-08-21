@@ -1,0 +1,12 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.container {
+    display: grid; 
+    grid-auto-rows: auto;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 40px;
+}
