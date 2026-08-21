@@ -1,4 +1,5 @@
 :host {
+    display: block;
     --error-color: deeppink;
     --main-color: var(--error-color);
     --on-main-color: var(--error-color);
@@ -12,6 +13,21 @@
 .secondary-main-color {
     --main-color: var(--g-secondary);
     --on-main-color: var(--g-on-secondary);
+}
+
+.error-main-color {
+    --main-color: var(--g-error);
+    --on-main-color: var(--g-error);
+}
+
+.gray-medium-main-color {
+    --main-color: var(--g-gray-medium);
+    --on-main-color: var(--g-gray-medium);
+}
+
+.gray-light-main-color {
+    --main-color: var(--g-gray-light);
+    --on-main-color: var(--g-gray-light);
 }
 
 .fill {
@@ -29,12 +45,28 @@
 .button {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 4px;
     height: 4.8rem;
-    width: 100%;
     border-radius: 4px;
     font-size: inherit;
+    white-space: nowrap;
+    padding: 8px;
+}
+
+.justify-content-start {
+    justify-content: flex-start;
+}
+
+.justify-content-center {
+    justify-content: center;
+}
+
+.justify-content-end {
+    justify-content: flex-end;
+}
+
+.full-width {
+    width: 100%;
 }
 
 .fill:hover {
@@ -61,7 +93,17 @@
     border: none;
 }
 
-.border-hidden:hover {
+.padding-horizontal-none {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.padding-horizontal-small {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.hover-underline:hover {
     text-decoration: underline;
     background-color: transparent;
 }

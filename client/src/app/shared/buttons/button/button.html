@@ -2,5 +2,8 @@
     @if (isLoading()) {
     <app-spinner [color]="spinnerColor()" />
     }
+    @else if (icon()) {
+    <app-icon [icon]="icon()" />
+    }
     {{ label() }}
 </button>
