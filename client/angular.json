@@ -35,6 +35,7 @@
               "src/styles-base-typography.scss",
               "src/styles-base-animations.scss",
               "src/styles-panels.scss",
+              "src/styles-pages.scss",
               "src/styles-forms.scss"
             ]
           },

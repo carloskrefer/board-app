@@ -1,0 +1,13 @@
+html {
+    --g-page-padding: 16px;
+}
+
+.g-page-padding {
+    padding: var(--g-page-padding);
+}
+
+@media (min-width: 580px) {
+    html {
+        --g-page-padding: 40px;
+    }
+}
