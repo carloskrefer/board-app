@@ -32,6 +32,7 @@
             "styles": [
               "src/styles.scss",
               "src/styles-base-colors.scss",
+              "src/styles-base-typography.scss",
               "src/styles-panels.scss",
               "src/styles-forms.scss"
             ]
