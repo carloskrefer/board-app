@@ -1,11 +1,27 @@
 :host {
-    width: 150px;
+    display: block;
 }
 
-.primary-color {
+.primary {
     fill: var(--g-primary);
 }
 
-.gray-color {
+.gray {
     fill: var(--g-gray-medium);
+}
+
+.gray-lighter {
+    fill: var(--g-gray-lighter);
+}
+
+.small {
+    height: 32px;
+}
+
+.medium {
+    height: 48px;
+}
+
+.large {
+    height: 66px;
 }
