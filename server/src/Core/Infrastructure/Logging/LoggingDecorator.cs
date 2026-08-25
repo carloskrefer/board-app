@@ -1,8 +1,7 @@
 using System.Diagnostics;
-using Core.Logging.Extensions;
 using Microsoft.Extensions.Logging;
 
-namespace Core.Logging.Decorators;
+namespace Core.Infrastructure.Logging;
 
 public class Projections<TInput, TOutputValue>
 {

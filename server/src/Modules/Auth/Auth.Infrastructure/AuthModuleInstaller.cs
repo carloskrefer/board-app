@@ -1,5 +1,4 @@
-﻿using Auth.Application.Installation.Extensions;
-using Auth.Infrastructure.Installation.Extensions;
+﻿using Auth.Infrastructure.Installation.Extensions;
 using Auth.Infrastructure.Persistance;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -15,7 +14,7 @@ public static class AuthModuleInstaller
         services.AddUnitOfWork();
         services.AddRepositories();
         services.AddApplicationServicesImplementations();
-        services.AddApplicationServices();
+        services.AddHandlers();
         services.AddDomainServicesImplementations();
     }
 
