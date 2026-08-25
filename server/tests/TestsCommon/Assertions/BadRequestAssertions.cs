@@ -1,5 +1,5 @@
 using System.Net.Http.Json;
-using Core.Api.Errors;
+using Contracts.Errors;
 
 namespace TestsCommon.Assertions;
 
@@ -12,7 +12,7 @@ public static class BadRequestAssertions
     public static async Task AssertGeneralResponse(
         HttpResponseMessage response,
         string expectedInstance,
-        GeneralResponseError expectedError)
+        BaseError expectedError)
     {
         var body = await AssertResponseExceptErrorsArrayAndReturnBody(
             response, 
@@ -30,20 +30,20 @@ public static class BadRequestAssertions
     public static async Task AssertDetailedResponse(
         HttpResponseMessage response,
         string expectedInstance,
-        IEnumerable<DetailedResponseError> expectedErrors)
+        IEnumerable<DetailedError> expectedErrors)
     {
         var body = await AssertResponseExceptErrorsArrayAndReturnBody(response, expectedInstance);
         AssertErrorsArray(expectedErrors, body.Errors);
     }
 
     public static void AssertErrorsArray(
-        IEnumerable<DetailedResponseError> expectedErrors,
-        IEnumerable<DetailedResponseError> actualErrors)
+        IEnumerable<DetailedError> expectedErrors,
+        IEnumerable<DetailedError> actualErrors)
     {
         Assert.True(expectedErrors.Order().SequenceEqual(actualErrors.Order()));
     }
 
-    public static async Task<ApiProblemDetails> AssertResponseExceptErrorsArrayAndReturnBody(
+    public static async Task<CustomProblemDetails> AssertResponseExceptErrorsArrayAndReturnBody(
         HttpResponseMessage response,
         string expectedInstance,
         string expectedTitle = "One or more validation errors occurred.",
@@ -55,7 +55,7 @@ public static class BadRequestAssertions
         var contentType = response.Content.Headers.GetValues("Content-Type").FirstOrDefault();
         Assert.Contains("application/problem+json", contentType);
 
-        var body = await response.Content.ReadFromJsonAsync<ApiProblemDetails>();
+        var body = await response.Content.ReadFromJsonAsync<CustomProblemDetails>();
         Assert.NotNull(body);
         Assert.Equal(expectedTitle, body.Title);
         Assert.Equal(expectedDetail, body.Detail);

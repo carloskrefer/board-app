@@ -1,9 +1,9 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Core.Api.Errors;
+namespace Contracts.Errors;
 
-public record GeneralResponseError(string Code, string Message);
+public record BaseError(string Code, string Message);
 
 public enum ErrorLocationEnum
 {
@@ -13,14 +13,14 @@ public enum ErrorLocationEnum
     Header = 3
 }
 
-public record DetailedResponseError : GeneralResponseError
+public record DetailedError : BaseError
 {
     public string? Field { get; }
     public ErrorLocationEnum? Location { get; }
     public string? RejectedValue { get; }
 
     [JsonConstructor]
-    public DetailedResponseError(
+    public DetailedError(
         string code, 
         string message, 
         string? field = null, 
@@ -33,8 +33,8 @@ public record DetailedResponseError : GeneralResponseError
         RejectedValue = rejectedValue;
     }
 
-    public DetailedResponseError(
-        GeneralResponseError generalError, 
+    public DetailedError(
+        BaseError generalError, 
         string? field = null, 
         ErrorLocationEnum? location = null, 
         string? rejectedValue = null) 
@@ -46,8 +46,8 @@ public record DetailedResponseError : GeneralResponseError
     }
 }
 
-public class ApiProblemDetails: ProblemDetails
+public class CustomProblemDetails: ProblemDetails
 {
     public string? TraceId { get; set; }
-    public DetailedResponseError[] Errors { get; set; } = [];
+    public DetailedError[] Errors { get; set; } = [];
 }

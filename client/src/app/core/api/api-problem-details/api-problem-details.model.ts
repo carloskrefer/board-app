@@ -5,7 +5,7 @@ export enum ErrorLocationEnum {
     Header
 }
 
-export interface DetailedResponseError {
+export interface DetailedError {
     code: string;
     message: string;
     field?: string;
@@ -13,12 +13,12 @@ export interface DetailedResponseError {
     rejectedValue?: string;
 }
 
-export interface ApiProblemDetails {
+export interface CustomProblemDetails {
     traceId: string;
     type?: string;
     title?: string;
     status?: number;
     detail?: string;
     instance?: string;
-    errors: DetailedResponseError[];
+    errors: DetailedError[];
 }

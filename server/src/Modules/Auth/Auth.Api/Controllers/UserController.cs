@@ -1,7 +1,7 @@
 ﻿using Auth.Api.Mappers.Extensions;
 using Auth.Application.Commands;
-using Core.Api.DTOs.Auth.User;
-using Core.Api.Errors;
+using Contracts.Auth;
+using Contracts.Errors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,7 +24,7 @@ public class UserController : ControllerBase
 
     [HttpPost]
     [ProducesResponseType(201, Type=typeof(SignInResponse))]
-    [ProducesResponseType<ApiProblemDetails>(400)]
+    [ProducesResponseType<CustomProblemDetails>(400)]
     [Consumes("application/json")]
     [Produces("application/problem+json")]
     public async Task<IActionResult> SignIn([FromBody] SignInRequest request, CancellationToken ct)
@@ -41,7 +41,7 @@ public class UserController : ControllerBase
 
     [HttpPost("login")]
     [ProducesResponseType(200, Type=typeof(LogInResponse))]
-    [ProducesResponseType<ApiProblemDetails>(400)]
+    [ProducesResponseType<CustomProblemDetails>(400)]
     [Consumes("application/json")]
     [Produces("application/problem+json")]
     public async Task<IActionResult> LogIn([FromBody] LogInRequest request, CancellationToken ct)

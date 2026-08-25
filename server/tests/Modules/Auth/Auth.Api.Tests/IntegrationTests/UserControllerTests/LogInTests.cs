@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TestsCommon.Persistance.Factories;
 using TestsCommon.Persistance.Base;
 using Auth.Api.Tests.CollectionFixtures;
-using Core.Api.DTOs.Auth.User;
+using Contracts.Auth;
 using Auth.Api.Tests.Builders;
 using TestsCommon.Extensions;
 using TestsCommon.Helpers;

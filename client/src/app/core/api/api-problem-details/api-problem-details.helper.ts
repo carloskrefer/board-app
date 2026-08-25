@@ -1,6 +1,6 @@
-import { ApiProblemDetails } from "./api-problem-details.model";
+import { CustomProblemDetails } from "./api-problem-details.model";
 
-export function isApiProblemDetails(value: unknown): value is ApiProblemDetails {
+export function isCustomProblemDetails(value: unknown): value is CustomProblemDetails {
     return (
         typeof value === 'object' &&
         value !== null &&

@@ -1,7 +1,7 @@
 import { email, FieldTree, maxLength, minLength, pattern, required, schema, TreeValidationResult, validate, ValidationError } from "@angular/forms/signals";
 import { Signin } from "./signin-page.models";
 import { HttpErrorResponse, HttpStatusCode } from "@angular/common/http";
-import { isApiProblemDetails } from "../../../core/api/api-problem-details/api-problem-details.helper";
+import { isCustomProblemDetails } from "../../../core/api/api-problem-details/api-problem-details.helper";
 import { unknown } from "../../../core/form/validation-errors";
 
 export const signInSchema = schema<Signin>((path) => {
@@ -27,7 +27,7 @@ export const signInSchema = schema<Signin>((path) => {
 export function toValidationError(
     response: unknown,
     form: FieldTree<Signin>): TreeValidationResult<ValidationError.WithOptionalFieldTree> {
-    const isCorrectType = response instanceof HttpErrorResponse && isApiProblemDetails(response.error);
+    const isCorrectType = response instanceof HttpErrorResponse && isCustomProblemDetails(response.error);
 
     if (!isCorrectType)
         return unknown;

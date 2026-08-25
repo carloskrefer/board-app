@@ -1,84 +1,84 @@
-using Core.Api.Errors;
-using Core.String.Extensions;
+using Contracts.Errors;
+using Constracts.Serializing;
 
-namespace Core.Api.DTOs.Auth.User;
+namespace Contracts.Auth;
 
 public record SignInRequest(string Email, string Name, string Password);
 public record SignInResponse(Guid UserId);
 
 public static class SignInResponseErrors
 {
-    public static DetailedResponseError EmailAlreadyRegistered(string rejectedValue) =>
+    public static DetailedError EmailAlreadyRegistered(string rejectedValue) =>
         new(
             EmailResponseErrors.AlreadyRegistered,
-            nameof(SignInRequest.Email).FromPascalCaseToCamelCase(),
+            nameof(SignInRequest.Email).ToCamelCase(),
             ErrorLocationEnum.Body,
             rejectedValue
         );
 
-    public static DetailedResponseError EmailFormat(string rejectedValue) =>
+    public static DetailedError EmailFormat(string rejectedValue) =>
         new(
             EmailResponseErrors.Format,
-            nameof(SignInRequest.Email).FromPascalCaseToCamelCase(),
+            nameof(SignInRequest.Email).ToCamelCase(),
             ErrorLocationEnum.Body,
             rejectedValue
         );
 
-    public static DetailedResponseError NameEmpty(string rejectedValue) =>
+    public static DetailedError NameEmpty(string rejectedValue) =>
         new(
             TextResponseErrors.Empty("Name"),
-            nameof(SignInRequest.Name).FromPascalCaseToCamelCase(),
+            nameof(SignInRequest.Name).ToCamelCase(),
             ErrorLocationEnum.Body,
             rejectedValue
         );
 
-    public static DetailedResponseError NameTooLong(string rejectedValue) =>
+    public static DetailedError NameTooLong(string rejectedValue) =>
         new(
             TextResponseErrors.TooLong(100, "Name"),
-            nameof(SignInRequest.Name).FromPascalCaseToCamelCase(),
+            nameof(SignInRequest.Name).ToCamelCase(),
             ErrorLocationEnum.Body,
             rejectedValue
         );
 
-    public static DetailedResponseError NameOnlySpecialCharacters(string rejectedValue) =>
+    public static DetailedError NameOnlySpecialCharacters(string rejectedValue) =>
         new(
             TextResponseErrors.OnlySpecialCharacters("Name"),
-            nameof(SignInRequest.Name).FromPascalCaseToCamelCase(),
+            nameof(SignInRequest.Name).ToCamelCase(),
             ErrorLocationEnum.Body,
             rejectedValue
         );
 
-    public static DetailedResponseError PasswordLength(string rejectedValue) =>
+    public static DetailedError PasswordLength(string rejectedValue) =>
         new(
             TextResponseErrors.BetweenRange(6, 100, "Password"),
-            nameof(SignInRequest.Password).FromPascalCaseToCamelCase(),
+            nameof(SignInRequest.Password).ToCamelCase(),
             ErrorLocationEnum.Body,
             rejectedValue
         );
 
-    public static DetailedResponseError PasswordSpecialCharacters(string rejectedValue) =>
+    public static DetailedError PasswordSpecialCharacters(string rejectedValue) =>
         new(
             "SPECIAL_CHARACTERS", 
             "Password must contain at least one special character. Examples: !?@#$%^&*()-+.",
-            nameof(SignInRequest.Password).FromPascalCaseToCamelCase(),
+            nameof(SignInRequest.Password).ToCamelCase(),
             ErrorLocationEnum.Body,
             rejectedValue
         );
 
-    public static DetailedResponseError PasswordUpperAndLowerCase(string rejectedValue) =>
+    public static DetailedError PasswordUpperAndLowerCase(string rejectedValue) =>
         new(
             "UPPER_AND_LOWER_CASE", 
             "Password must contain at least one uppercase and one lowercase letter.",
-            nameof(SignInRequest.Password).FromPascalCaseToCamelCase(),
+            nameof(SignInRequest.Password).ToCamelCase(),
             ErrorLocationEnum.Body,
             rejectedValue
         );
 
-    public static DetailedResponseError PasswordNumber(string rejectedValue) =>
+    public static DetailedError PasswordNumber(string rejectedValue) =>
         new(
             "NUMBERS", 
             "Password must contain at least one number.",
-            nameof(SignInRequest.Password).FromPascalCaseToCamelCase(),
+            nameof(SignInRequest.Password).ToCamelCase(),
             ErrorLocationEnum.Body,
             rejectedValue
         );  

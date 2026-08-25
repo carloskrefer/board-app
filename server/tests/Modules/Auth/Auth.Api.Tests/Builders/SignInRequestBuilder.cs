@@ -1,4 +1,4 @@
-using Core.Api.DTOs.Auth.User;
+using Contracts.Auth;
 
 namespace Auth.Api.Tests.Builders;
 

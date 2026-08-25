@@ -5,11 +5,11 @@ using Microsoft.Extensions.DependencyInjection;
 using TestsCommon.Persistance.Factories;
 using TestsCommon.Persistance.Base;
 using Auth.Api.Tests.CollectionFixtures;
-using Core.Api.Errors;
+using Contracts.Errors;
 using Core.String.Extensions;
 using TestsCommon.Assertions;
 using TestsCommon.Tests;
-using Core.Api.DTOs.Auth.User;
+using Contracts.Auth;
 using System.Net;
 
 namespace Auth.Api.Tests.IntegrationTests.UserControllerTests;
@@ -45,7 +45,7 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
         var requestBody = new SignInRequest("invalid-email", "Joshua", "ValidPassword123!");
         var response = await _client.PostAsJsonAsync(_url, requestBody);
 
-        List<DetailedResponseError> expectedErrors = [
+        List<DetailedError> expectedErrors = [
             new(
                 generalError: EmailResponseErrors.Format,
                 field: nameof(requestBody.Email).FromPascalCaseToCamelCase(),
@@ -68,7 +68,7 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
         requestBody = new SignInRequest(email, "Joshua II", "AnotherValidPassword123!");
         response = await _client.PostAsJsonAsync(_url, requestBody);
 
-        List<DetailedResponseError> expectedErrors = [
+        List<DetailedError> expectedErrors = [
             new(
                 generalError: EmailResponseErrors.AlreadyRegistered,
                 field: nameof(requestBody.Email).FromPascalCaseToCamelCase(),
@@ -85,7 +85,7 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
         var requestBody = new SignInRequest("test@example.com", "", "ValidPassword123!");
         var response = await _client.PostAsJsonAsync(_url, requestBody);
 
-        List<DetailedResponseError> expectedErrors = [
+        List<DetailedError> expectedErrors = [
             new(
                 generalError: TextResponseErrors.Empty("Name"),
                 field: nameof(requestBody.Name).FromPascalCaseToCamelCase(),
@@ -102,7 +102,7 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
         var requestBody = new SignInRequest("test@example.com", new string('A', 101), "ValidPassword123!");
         var response = await _client.PostAsJsonAsync(_url, requestBody);
 
-        List<DetailedResponseError> expectedErrors = [
+        List<DetailedError> expectedErrors = [
             new(
                 generalError: TextResponseErrors.TooLong(100, "Name"),
                 field: nameof(requestBody.Name).FromPascalCaseToCamelCase(),
@@ -119,7 +119,7 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
         var requestBody = new SignInRequest("test@example.com", "!@#$%^&*()-+", "ValidPassword123!");
         var response = await _client.PostAsJsonAsync(_url, requestBody);
 
-        List<DetailedResponseError> expectedErrors = [
+        List<DetailedError> expectedErrors = [
             new(
                 generalError: TextResponseErrors.OnlySpecialCharacters("Name"),
                 field: nameof(requestBody.Name).FromPascalCaseToCamelCase(),
@@ -136,7 +136,7 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
         var requestBody = new SignInRequest("test@example.com", "Joshua", "aA1!");
         var response = await _client.PostAsJsonAsync(_url, requestBody);
 
-        List<DetailedResponseError> expectedErrors = [
+        List<DetailedError> expectedErrors = [
             new(
                 TextResponseErrors.BetweenRange(6, 100, "Password"),
                 field: nameof(requestBody.Password).FromPascalCaseToCamelCase(),
@@ -153,7 +153,7 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
         var requestBody = new SignInRequest("test@example.com", "Joshua", $"{new string('A', 101)}!a1");
         var response = await _client.PostAsJsonAsync(_url, requestBody);
 
-        List<DetailedResponseError> expectedErrors = [
+        List<DetailedError> expectedErrors = [
             new(
                 generalError: TextResponseErrors.BetweenRange(6, 100, "Password"),
                 field: nameof(requestBody.Password).FromPascalCaseToCamelCase(),
@@ -170,7 +170,7 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
         var requestBody = new SignInRequest("test@example.com", "Joshua", "Password123");
         var response = await _client.PostAsJsonAsync(_url, requestBody);
 
-        List<DetailedResponseError> expectedErrors = [
+        List<DetailedError> expectedErrors = [
             new(
                 code: "SPECIAL_CHARACTERS",
                 message: "Password must contain at least one special character. Examples: !?@#$%^&*()-+.",
@@ -188,7 +188,7 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
         var requestBody = new SignInRequest("test@example.com", "Joshua", "PASSWORD123!");
         var response = await _client.PostAsJsonAsync(_url, requestBody);
 
-        List<DetailedResponseError> expectedErrors = [
+        List<DetailedError> expectedErrors = [
             new(
                 code: "UPPER_AND_LOWER_CASE",
                 message: "Password must contain at least one uppercase and one lowercase letter.",
@@ -206,7 +206,7 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
         var requestBody = new SignInRequest("test@example.com", "Joshua", "password123!");
         var response = await _client.PostAsJsonAsync(_url, requestBody);
 
-        List<DetailedResponseError> expectedErrors = [
+        List<DetailedError> expectedErrors = [
             new(
                 code: "UPPER_AND_LOWER_CASE",
                 message: "Password must contain at least one uppercase and one lowercase letter.",
@@ -224,7 +224,7 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
         var requestBody = new SignInRequest("test@example.com", "Joshua", "Password!");
         var response = await _client.PostAsJsonAsync(_url, requestBody);
 
-        List<DetailedResponseError> expectedErrors = [
+        List<DetailedError> expectedErrors = [
             new(
                 code: "NUMBERS", 
                 message: "Password must contain at least one number.",

@@ -1,7 +1,7 @@
 using System.Diagnostics;
-using Core.Api.Errors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Contracts.Errors;
 
 namespace Core.Api.Builders;
 
@@ -15,7 +15,7 @@ public static class BadRequestConstants
 
 public class BadRequestBuilder
 {
-    private readonly List<GeneralResponseError> _errors = new List<GeneralResponseError>();
+    private readonly List<BaseError> _errors = new List<BaseError>();
     private readonly ControllerBase _controller;
 
     public BadRequestBuilder(ControllerBase controller)
@@ -23,7 +23,7 @@ public class BadRequestBuilder
         _controller = controller;
     }
 
-    public BadRequestBuilder AddError(GeneralResponseError error)
+    public BadRequestBuilder AddError(BaseError error)
     {
         _errors.Add(error);
         return this;
@@ -31,7 +31,7 @@ public class BadRequestBuilder
 
     public IActionResult Build()
     {
-        var body = new ApiProblemDetails
+        var body = new CustomProblemDetails
         {
             Type = BadRequestConstants.TypeDefault,
             Title = BadRequestConstants.TitleGeneral,
@@ -52,12 +52,12 @@ public class BadRequestBuilder
         {
             body.Title = BadRequestConstants.TitleDetailed;
             body.Detail = BadRequestConstants.DetailDetailed;
-            body.Errors = _errors.Select(e => e as DetailedResponseError ?? new DetailedResponseError(e)).ToArray();
+            body.Errors = _errors.Select(e => e as DetailedError ?? new DetailedError(e)).ToArray();
         }
 
         return _controller.BadRequest(body);
     }
 
     private bool HasSingleErrorAndIsNotDetailed() => 
-        (_errors.Count == 1) && ((_errors[0] as DetailedResponseError) == null);
+        (_errors.Count == 1) && ((_errors[0] as DetailedError) == null);
 }
