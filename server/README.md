@@ -109,7 +109,7 @@ Follows DDD's domain modelling rules:
 - One Aggregate should not contain or directly manipulate other Aggregates.
 
 ## Application Layer Patterns
-- Each application layer service is called an _Use Case Service_ and must implement the `IUseCase` interface.
+- Each application layer service is called an _Use Case Service_ and must implement the `IHandler` interface.
 - Use Cases Services retrieve and change data through Repository interfaces. 
   - Each Aggregate Root must have it's own single repository.
   - Each repository should only manipulate data inside it's aggregate.

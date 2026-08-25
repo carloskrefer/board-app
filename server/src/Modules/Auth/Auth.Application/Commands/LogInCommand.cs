@@ -5,9 +5,9 @@ using Auth.Domain.Interfaces.Services;
 using Auth.Domain.ValueObjects;
 using Core.Logging.Decorators;
 
-namespace Auth.Application.UseCases;
+namespace Auth.Application.Commands;
 
-public record LogInInput(string Email, string Password, string IpAddress, string UserAgent) : Loggable
+public record LogInCommand(string Email, string Password, string IpAddress, string UserAgent) : Loggable
 {
     public object ToLog() => new { Email };
     public object ToLogIdentity() => new { Email };
@@ -19,14 +19,14 @@ public record LogInOutput(string Email, Guid SessionId, string CredentialsSerial
     public object ToLogIdentity() => new { Email };
 }
 
-public class LogInService : IUseCase<LogInInput, Result<LogInOutput>>
+public class LogInCommandHandler : IHandler<LogInCommand, Result<LogInOutput>>
 {
     private readonly IUserRepository _userRepository;
     private readonly IAuthUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _passwordHasher;
     private readonly ICredentialsService _credentialsService;
 
-    public LogInService(
+    public LogInCommandHandler(
         IUserRepository userRepository, 
         IAuthUnitOfWork unitOfWork, 
         IPasswordHasher passwordHasher,
@@ -38,7 +38,7 @@ public class LogInService : IUseCase<LogInInput, Result<LogInOutput>>
         _credentialsService = credentialsService ?? throw new ArgumentNullException(nameof(credentialsService));
     }
 
-    public async Task<Result<LogInOutput>> ExecuteAsync(LogInInput input, CancellationToken ct)
+    public async Task<Result<LogInOutput>> HandleAsync(LogInCommand input, CancellationToken ct)
     {
         var email = Email.Create(input.Email);
 

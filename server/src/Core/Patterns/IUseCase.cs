@@ -4,13 +4,13 @@
 /// <remarks>
 /// <para>
 /// Todo caso de uso deve implementar diretamente
-/// <see cref="IUseCase{TInput, TOutput}"/>, representando uma operação
+/// <see cref="IHandler{TInput, TOutput}"/>, representando uma operação
 /// específica da aplicação.
 /// </para>
 ///
 /// <para>
 /// Os consumidores (controllers, endpoints, handlers e similares) devem
-/// depender diretamente de <see cref="IUseCase{TInput, TOutput}"/>,
+/// depender diretamente de <see cref="IHandler{TInput, TOutput}"/>,
 /// evitando a criação de interfaces específicas apenas para encapsular
 /// este contrato.
 /// </para>
@@ -31,10 +31,10 @@
 /// <example>
 /// <para>Exemplo de uso:</para>
 /// <code>
-/// public class SignInService
-///     : IUseCase&lt;SignInRequest, SignInResponse&gt;
+/// public class SignInCommandHandler
+///     : IHandler&lt;SignInRequest, SignInResponse&gt;
 /// {
-///     public Task&lt;SignInResponse&gt; ExecuteAsync(SignInRequest input)
+///     public Task&lt;SignInResponse&gt; HandleAsync(SignInRequest input)
 ///     {
 ///         ...
 ///     }
@@ -44,19 +44,19 @@
 /// <para>Evite criar interfaces intermediárias:</para>
 /// 
 /// <code>
-/// public interface ISignInService
-///     : IUseCase&lt;SignInRequest, SignInResponse&gt;
+/// public interface ISignInCommandHandler
+///     : IHandler&lt;SignInRequest, SignInResponse&gt;
 /// {
 /// }
 ///
-/// public class SignInService : ISignInService
+/// public class SignInCommandHandler : ISignInCommandHandler
 /// {
 /// }
 /// </code>
 ///
 /// <para>Prefira depender diretamente do contrato genérico:</para>
 /// <code>
-/// IUseCase&lt;SignInRequest, SignInResponse&gt; signInService
+/// IHandler&lt;SignInRequest, SignInResponse&gt; SignInCommandHandler
 /// </code>
 /// </example>
 /// </remarks>
@@ -66,7 +66,7 @@
 /// <typeparam name="TOutput">
 /// Tipo da saída produzida pelo caso de uso.
 /// </typeparam>
-public interface IUseCase<TInput, TOutput> where TOutput : Result
+public interface IHandler<TInput, TOutput> where TOutput : Result
 {
-    public Task<TOutput> ExecuteAsync(TInput input, CancellationToken ct);
+    public Task<TOutput> HandleAsync(TInput input, CancellationToken ct);
 }

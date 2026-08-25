@@ -1,4 +1,4 @@
-using Auth.Application.UseCases;
+using Auth.Application.Commands;
 using Auth.Domain.Interfaces.Services;
 using Core.Logging.Decorators;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,40 +10,40 @@ public static class IServiceCollectionExtensions
 {
     public static void AddApplicationServices(this IServiceCollection services)
     {
-        AddSignInService(services);
-        AddLogInService(services);
+        AddSignInCommandHandler(services);
+        AddLogInCommandHandler(services);
     }
 
-    private static void AddSignInService(this IServiceCollection services)
+    private static void AddSignInCommandHandler(this IServiceCollection services)
     {
-        services.AddScoped<SignInService>();
+        services.AddScoped<SignInCommandHandler>();
 
-        services.AddScoped<IUseCase<SignInInput, Result<SignInOutput>>>(sp => {
-            var useCase = sp.GetRequiredService<SignInService>();
+        services.AddScoped<IHandler<SignInCommand, Result<SignInOutput>>>(sp => {
+            var useCase = sp.GetRequiredService<SignInCommandHandler>();
 
             var logger = 
                 sp.GetRequiredService<
-                    ILogger<LoggingDecorator<SignInInput, Result<SignInOutput>, SignInOutput>>
+                    ILogger<LoggingDecorator<SignInCommand, Result<SignInOutput>, SignInOutput>>
                 >();
             
-            return new LoggingDecorator<SignInInput, Result<SignInOutput>, SignInOutput>(logger, useCase, "Sign In");
+            return new LoggingDecorator<SignInCommand, Result<SignInOutput>, SignInOutput>(logger, useCase, "Sign In");
         });
     }
 
     // TODO: See if I can put this repetitive code in a generic method
-    private static void AddLogInService(this IServiceCollection services)
+    private static void AddLogInCommandHandler(this IServiceCollection services)
     {
-        services.AddScoped<LogInService>();
+        services.AddScoped<LogInCommandHandler>();
 
-        services.AddScoped<IUseCase<LogInInput, Result<LogInOutput>>>(sp => {
-            var useCase = sp.GetRequiredService<LogInService>();
+        services.AddScoped<IHandler<LogInCommand, Result<LogInOutput>>>(sp => {
+            var useCase = sp.GetRequiredService<LogInCommandHandler>();
 
             var logger = 
                 sp.GetRequiredService<
-                    ILogger<LoggingDecorator<LogInInput, Result<LogInOutput>, LogInOutput>>
+                    ILogger<LoggingDecorator<LogInCommand, Result<LogInOutput>, LogInOutput>>
                 >();
             
-            return new LoggingDecorator<LogInInput, Result<LogInOutput>, LogInOutput>(logger, useCase, "Log In");
+            return new LoggingDecorator<LogInCommand, Result<LogInOutput>, LogInOutput>(logger, useCase, "Log In");
         });
     }
 }

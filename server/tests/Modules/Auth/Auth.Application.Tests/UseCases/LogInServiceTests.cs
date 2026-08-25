@@ -1,19 +1,19 @@
 using Auth.Application.Tests.Builders;
 using Auth.Application.Tests.Mocks;
 using Auth.Domain.Entities;
-using Auth.Application.Tests.Builders.UseCases;
+using Auth.Application.Tests.Builders.Commands;
 using Auth.Application.Tests.Builders.Domain.Entities;
-using Auth.Application.UseCases;
+using Auth.Application.Commands;
 using Auth.Domain.ValueObjects;
 
 namespace Auth.Application.Tests.UseCases;
 
-public class LogInServiceTests
+public class LogInCommandHandlerTests
 {
     [Fact]
     public async Task Should_Create_And_Return_Single_Correct_Session_When_Input_Is_Valid()
     {
-        var builder = new LogInServiceBuilder();
+        var builder = new LogInCommandHandlerBuilder();
         var user = new UserBuilder().WithPasswordHasher(builder.Hasher).Build();
 
         UserRepositoryMock repository = new() {
@@ -22,9 +22,9 @@ public class LogInServiceTests
         };
 
         var service = builder.WithRepository(repository).Build();
-        var input = new LogInInputBuilder().WithEmail(user.Email.Value).Build();
+        var input = new LogInCommandBuilder().WithEmail(user.Email.Value).Build();
 
-        var result = await service.ExecuteAsync(input, CancellationToken.None);
+        var result = await service.HandleAsync(input, CancellationToken.None);
 
         Assert.True(result.IsSuccess);
         Assert.Single(user.Sessions);
@@ -34,7 +34,7 @@ public class LogInServiceTests
     [Fact]
     public async Task Should_Generate_And_Return_Correct_Credentials_When_Input_Is_Valid()
     {
-        var builder = new LogInServiceBuilder();
+        var builder = new LogInCommandHandlerBuilder();
         var user = new UserBuilder().WithPasswordHasher(builder.Hasher).Build();
 
         UserRepositoryMock repository = new() {
@@ -49,9 +49,9 @@ public class LogInServiceTests
             user.Email.Value, 
             user.Name.Value);
 
-        var input = new LogInInputBuilder().WithEmail(user.Email.Value).Build();
+        var input = new LogInCommandBuilder().WithEmail(user.Email.Value).Build();
 
-        var result = await service.ExecuteAsync(input, CancellationToken.None);
+        var result = await service.HandleAsync(input, CancellationToken.None);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(expectedCredentials, result.Value.CredentialsSerialized);
@@ -60,7 +60,7 @@ public class LogInServiceTests
     [Fact]
     public async Task Should_Only_Call_GetUserByEmailAsync_And_CommitAsync_Once_When_Input_Is_Valid()
     {
-        var builder = new LogInServiceBuilder();
+        var builder = new LogInCommandHandlerBuilder();
         var unitOfWork = builder.UnitOfWork;
 
         UserRepositoryMock repository = new() {
@@ -68,9 +68,9 @@ public class LogInServiceTests
         };
 
         var service = builder.WithRepository(repository).Build();
-        var input = new LogInInputBuilder().Build();
+        var input = new LogInCommandBuilder().Build();
 
-        var result = await service.ExecuteAsync(input, CancellationToken.None);
+        var result = await service.HandleAsync(input, CancellationToken.None);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(1, repository.Tracker.GetCallCount(nameof(repository.GetUserByEmailAsync)));
@@ -86,10 +86,10 @@ public class LogInServiceTests
             GetUserByEmailAsyncHandler = (_, _) => Task.FromResult<User?>(null)
         };
 
-        var builder = new LogInServiceBuilder().WithRepository(repository);
-        var input = new LogInInputBuilder().Build();
+        var builder = new LogInCommandHandlerBuilder().WithRepository(repository);
+        var input = new LogInCommandBuilder().Build();
 
-        var result = await builder.Build().ExecuteAsync(input, CancellationToken.None);
+        var result = await builder.Build().HandleAsync(input, CancellationToken.None);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(UserErrors.NotFound, result.Error);
@@ -98,7 +98,7 @@ public class LogInServiceTests
     [Fact]
     public async Task Should_Only_Call_GetUserByEmailAsync_And_Only_Once_When_Email_Does_Not_Exist()
     {
-        var builder = new LogInServiceBuilder();
+        var builder = new LogInCommandHandlerBuilder();
         var unitOfWork = builder.UnitOfWork;
 
         UserRepositoryMock repository = new() {
@@ -106,9 +106,9 @@ public class LogInServiceTests
         };
 
         var service = builder.WithRepository(repository).Build();
-        var input = new LogInInputBuilder().Build();
+        var input = new LogInCommandBuilder().Build();
 
-        var result = await service.ExecuteAsync(input, CancellationToken.None);
+        var result = await service.HandleAsync(input, CancellationToken.None);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(1, repository.Tracker.GetCallCount(nameof(repository.GetUserByEmailAsync)));
@@ -120,7 +120,7 @@ public class LogInServiceTests
     [Fact]
     public async Task Should_Return_Failure_When_Unit_Of_Work_Fails()
     {
-        var builder = new LogInServiceBuilder();
+        var builder = new LogInCommandHandlerBuilder();
         var password = "Password123!";
         var user = new UserBuilder().WithPassword(password).WithPasswordHasher(builder.Hasher).Build();
 
@@ -134,15 +134,15 @@ public class LogInServiceTests
             CommitAsyncHandler = (_, _) => Task.FromResult(Result.Failure<int>(UnitOfWorkErrors.DatabaseError))
         };
 
-        var service = new LogInServiceBuilder().WithRepository(repository).WithUnitOfWork(unitOfWork).Build();
+        var service = new LogInCommandHandlerBuilder().WithRepository(repository).WithUnitOfWork(unitOfWork).Build();
 
-        var input = new LogInInput(
+        var input = new LogInCommand(
             Email: user.Email.Value, 
             Password: password, 
             IpAddress: "127.0.0.1", 
             UserAgent: "Mozilla/5.0");
 
-        var result = await service.ExecuteAsync(input, CancellationToken.None);
+        var result = await service.HandleAsync(input, CancellationToken.None);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(UnitOfWorkErrors.DatabaseError, result.Error);
@@ -156,10 +156,10 @@ public class LogInServiceTests
             GetUserByEmailAsyncHandler = (_, _) => 
                 Task.FromResult<User?>(new UserBuilder().WithPassword("CORRECTpassword123!").Build())
         };
-        var service = new LogInServiceBuilder().WithRepository(repository).Build();
-        var input = new LogInInputBuilder().WithPassword("WRONGpassword123!").Build();
+        var service = new LogInCommandHandlerBuilder().WithRepository(repository).Build();
+        var input = new LogInCommandBuilder().WithPassword("WRONGpassword123!").Build();
 
-        var result = await service.ExecuteAsync(input, CancellationToken.None);
+        var result = await service.HandleAsync(input, CancellationToken.None);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(UserErrors.IncorrectPassword, result.Error);
@@ -168,11 +168,11 @@ public class LogInServiceTests
     [Fact]
     public async Task Should_Propagate_Email_Format_Errors_And_Without_Calling_User_Repository()
     {
-        var builder = new LogInServiceBuilder();
+        var builder = new LogInCommandHandlerBuilder();
         var service = builder.Build();
-        var input = new LogInInputBuilder().WithEmail("invalid-email").Build();
+        var input = new LogInCommandBuilder().WithEmail("invalid-email").Build();
 
-        var result = await service.ExecuteAsync(input, CancellationToken.None);
+        var result = await service.HandleAsync(input, CancellationToken.None);
 
         Assert.False(result.IsSuccess);
         Assert.True(result.Error.HasSameCodeId(EmailErrors.Id));
@@ -182,11 +182,11 @@ public class LogInServiceTests
     [Fact]
     public async Task Should_Propagate_Password_Format_Errors_And_Without_Calling_User_Repository()
     {
-        var builder = new LogInServiceBuilder();
+        var builder = new LogInCommandHandlerBuilder();
         var service = builder.Build();
-        var input = new LogInInputBuilder().WithPassword("invalid").Build();
+        var input = new LogInCommandBuilder().WithPassword("invalid").Build();
 
-        var result = await service.ExecuteAsync(input, CancellationToken.None);
+        var result = await service.HandleAsync(input, CancellationToken.None);
 
         Assert.False(result.IsSuccess);
         Assert.True(result.Error.HasSameCodeId(PasswordErrors.Id));

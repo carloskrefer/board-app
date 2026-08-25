@@ -4,9 +4,9 @@ using Auth.Domain.Entities;
 using Auth.Domain.Interfaces.Services;
 using Core.Logging.Decorators;
 
-namespace Auth.Application.UseCases;
+namespace Auth.Application.Commands;
 
-public record SignInInput(string Email, string Name, string Password) : Loggable
+public record SignInCommand(string Email, string Name, string Password) : Loggable
 {
     public object ToLog() => new { Email, Name };
     public object ToLogIdentity() => new { Email };
@@ -18,20 +18,20 @@ public record SignInOutput(Guid UserId) : Loggable
     public object ToLogIdentity() => new { UserId };
 }
 
-public class SignInService : IUseCase<SignInInput, Result<SignInOutput>>
+public class SignInCommandHandler : IHandler<SignInCommand, Result<SignInOutput>>
 {
     private readonly IUserRepository _userRepository;
     private readonly IAuthUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _passwordHasher;
 
-    public SignInService(IUserRepository userRepository, IAuthUnitOfWork unitOfWork, IPasswordHasher passwordHasher)
+    public SignInCommandHandler(IUserRepository userRepository, IAuthUnitOfWork unitOfWork, IPasswordHasher passwordHasher)
     {
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _passwordHasher = passwordHasher ?? throw new ArgumentNullException(nameof(passwordHasher));
     }
 
-    public async Task<Result<SignInOutput>> ExecuteAsync(SignInInput input, CancellationToken ct)
+    public async Task<Result<SignInOutput>> HandleAsync(SignInCommand input, CancellationToken ct)
     {
         var userResult = input.ToUser(_passwordHasher);
 

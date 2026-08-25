@@ -2,11 +2,11 @@ using Auth.Application.Tests.Builders;
 using Auth.Application.Tests.Mocks;
 using Auth.Domain.Entities;
 using Auth.Domain.ValueObjects;
-using Auth.Application.Tests.Builders.UseCases;
+using Auth.Application.Tests.Builders.Commands;
 
 namespace Auth.Application.Tests.UseCases;
 
-public class SignInServiceTests
+public class SignInCommandHandlerTests
 {
     [Fact]
     public async Task Should_Return_New_User_Guid_When_Input_Is_Valid()
@@ -22,10 +22,10 @@ public class SignInServiceTests
             }
         };
 
-        var input = new SignInInputBuilder().Build();
-        var service = new SignInServiceBuilder().WithRepository(repository).Build();
+        var input = new SignInCommandBuilder().Build();
+        var service = new SignInCommandHandlerBuilder().WithRepository(repository).Build();
 
-        var result = await service.ExecuteAsync(input, CancellationToken.None);
+        var result = await service.HandleAsync(input, CancellationToken.None);
 
         Assert.True(result.IsSuccess);
         Assert.NotEqual(Guid.Empty, result.Value.UserId);
@@ -37,13 +37,13 @@ public class SignInServiceTests
     [Fact]
     public async Task Should_Only_Create_User_And_Check_Email_And_Commit_All_Only_Once_When_Input_Is_Valid()
     {
-        var input = new SignInInputBuilder().Build();
-        var builder = new SignInServiceBuilder();
+        var input = new SignInCommandBuilder().Build();
+        var builder = new SignInCommandHandlerBuilder();
         var service = builder.Build();
         var repository = builder.Repository;
         var unitOfWork = builder.UnitOfWork;
 
-        var result = await service.ExecuteAsync(input, CancellationToken.None);
+        var result = await service.HandleAsync(input, CancellationToken.None);
 
         Assert.True(result.IsSuccess);
         Assert.NotEqual(Guid.Empty, result.Value.UserId);
@@ -62,10 +62,10 @@ public class SignInServiceTests
             IsEmailRegisteredAsyncHandler = (_, _) => Task.FromResult(true)
         };
 
-        var input = new SignInInputBuilder().Build();
-        var service = new SignInServiceBuilder().WithRepository(repository).Build();
+        var input = new SignInCommandBuilder().Build();
+        var service = new SignInCommandHandlerBuilder().WithRepository(repository).Build();
 
-        var result = await service.ExecuteAsync(input, CancellationToken.None);
+        var result = await service.HandleAsync(input, CancellationToken.None);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(UserErrors.EmailAlreadyExists, result.Error);
@@ -79,10 +79,10 @@ public class SignInServiceTests
             CommitAsyncHandler = (_, _) => Task.FromResult(Result.Failure<int>(UnitOfWorkErrors.DatabaseError))
         };
 
-        var input = new SignInInputBuilder().Build();
-        var service = new SignInServiceBuilder().WithUnitOfWork(unitOfWork).Build();
+        var input = new SignInCommandBuilder().Build();
+        var service = new SignInCommandHandlerBuilder().WithUnitOfWork(unitOfWork).Build();
 
-        var result = await service.ExecuteAsync(input, CancellationToken.None);
+        var result = await service.HandleAsync(input, CancellationToken.None);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(UnitOfWorkErrors.DatabaseError, result.Error);
@@ -91,10 +91,10 @@ public class SignInServiceTests
     [Fact]
     public async Task Should_Propagate_User_Creation_Errors()
     {
-        var input = new SignInInputBuilder().WithEmail("invalid-email").Build();
-        var service = new SignInServiceBuilder().Build();
+        var input = new SignInCommandBuilder().WithEmail("invalid-email").Build();
+        var service = new SignInCommandHandlerBuilder().Build();
 
-        var result = await service.ExecuteAsync(input, CancellationToken.None);
+        var result = await service.HandleAsync(input, CancellationToken.None);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(EmailErrors.Format, result.Error);
@@ -113,10 +113,10 @@ public class SignInServiceTests
             }
         };
 
-        var input = new SignInInputBuilder().Build();
-        var service = new SignInServiceBuilder().WithRepository(repository).Build();
+        var input = new SignInCommandBuilder().Build();
+        var service = new SignInCommandHandlerBuilder().WithRepository(repository).Build();
 
-        var result = await service.ExecuteAsync(input, CancellationToken.None);
+        var result = await service.HandleAsync(input, CancellationToken.None);
 
         Assert.True(result.IsSuccess);
         Assert.NotNull(userCreated);

@@ -1,5 +1,5 @@
 using Auth.Api.Controllers;
-using Auth.Application.UseCases;
+using Auth.Application.Commands;
 using Auth.Domain.Entities;
 using Auth.Domain.ValueObjects;
 using Core.Api.Builders;
@@ -11,7 +11,7 @@ namespace Auth.Api.Mappers.Extensions;
 
 public static class LogInRequestExtensions
 {
-    public static LogInInput ToLogInInput(this LogInRequest request, string? ipAddress, string? userAgent) => 
+    public static LogInCommand ToLogInCommand(this LogInRequest request, string? ipAddress, string? userAgent) => 
         new (request.Email, request.Password, ipAddress ?? "Unknown", userAgent ?? "Unknown");
 
 

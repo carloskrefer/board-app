@@ -1,5 +1,5 @@
 using Auth.Api.Controllers;
-using Auth.Application.UseCases;
+using Auth.Application.Commands;
 using Auth.Domain.Entities;
 using Auth.Domain.ValueObjects;
 using Core.Api.Builders;
@@ -10,9 +10,9 @@ namespace Auth.Api.Mappers.Extensions;
 
 public static class SignInRequestExtensions
 {
-    public static SignInInput ToSignInInput(this SignInRequest request)
+    public static SignInCommand ToSignInCommand(this SignInRequest request)
     {
-        return new SignInInput(request.Email, request.Name, request.Password);
+        return new SignInCommand(request.Email, request.Name, request.Password);
     }
 
     public static SignInResponse ToSignInResponse(this SignInOutput output) => new (output.UserId);

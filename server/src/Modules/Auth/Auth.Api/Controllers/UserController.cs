@@ -1,5 +1,5 @@
 ﻿using Auth.Api.Mappers.Extensions;
-using Auth.Application.UseCases;
+using Auth.Application.Commands;
 using Core.Api.DTOs.Auth.User;
 using Core.Api.Errors;
 using Microsoft.AspNetCore.Http;
@@ -12,14 +12,14 @@ namespace Auth.Api.Controllers;
 [Route("/api/users")]
 public class UserController : ControllerBase
 {
-    private readonly IUseCase<SignInInput, Result<SignInOutput>> _signInService;
-    private readonly IUseCase<LogInInput, Result<LogInOutput>> _logInService;
+    private readonly IHandler<SignInCommand, Result<SignInOutput>> _signInCommandHandler;
+    private readonly IHandler<LogInCommand, Result<LogInOutput>> _logInCommandHandler;
     public UserController(
-        IUseCase<SignInInput, Result<SignInOutput>> signInService,
-        IUseCase<LogInInput, Result<LogInOutput>> logInService)
+        IHandler<SignInCommand, Result<SignInOutput>> signInCommandHandler,
+        IHandler<LogInCommand, Result<LogInOutput>> logInCommandHandler)
     {
-        _signInService = signInService ?? throw new ArgumentNullException(nameof(signInService));
-        _logInService = logInService ?? throw new ArgumentNullException(nameof(logInService));
+        _signInCommandHandler = signInCommandHandler ?? throw new ArgumentNullException(nameof(SignInCommandHandler));
+        _logInCommandHandler = logInCommandHandler ?? throw new ArgumentNullException(nameof(LogInCommandHandler));
     }
 
     [HttpPost]
@@ -29,7 +29,7 @@ public class UserController : ControllerBase
     [Produces("application/problem+json")]
     public async Task<IActionResult> SignIn([FromBody] SignInRequest request, CancellationToken ct)
     {
-        var result = await _signInService.ExecuteAsync(request.ToSignInInput(), ct);
+        var result = await _signInCommandHandler.HandleAsync(request.ToSignInCommand(), ct);
 
         if (result.IsFailure)
             return request.ToBadRequest(this, result.Error);
@@ -46,11 +46,11 @@ public class UserController : ControllerBase
     [Produces("application/problem+json")]
     public async Task<IActionResult> LogIn([FromBody] LogInRequest request, CancellationToken ct)
     {
-        var input = request.ToLogInInput(
+        var command = request.ToLogInCommand(
             ipAddress: HttpContext.Connection.RemoteIpAddress?.ToString(), 
             userAgent: HttpContext.Request.Headers["User-Agent"].ToString());
 
-        var result = await _logInService.ExecuteAsync(input, ct);
+        var result = await _logInCommandHandler.HandleAsync(command, ct);
 
         if (result.IsFailure)
             return request.ToBadRequest(this, result.Error);

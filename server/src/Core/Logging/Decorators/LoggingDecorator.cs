@@ -10,18 +10,18 @@ public interface Loggable {
     public object ToLogIdentity();
 }
 
-public class LoggingDecorator<TInput, TOutput, TOutputValue> : IUseCase<TInput, TOutput> 
+public class LoggingDecorator<TInput, TOutput, TOutputValue> : IHandler<TInput, TOutput> 
     where TInput : Loggable
     where TOutput : Result<TOutputValue>
     where TOutputValue : Loggable
 {
-    private IUseCase<TInput, TOutput> _useCase;
+    private IHandler<TInput, TOutput> _useCase;
     private ILogger<LoggingDecorator<TInput, TOutput, TOutputValue>> _logger;
     private readonly string useCaseName;
 
     public LoggingDecorator(
         ILogger<LoggingDecorator<TInput, TOutput, TOutputValue>> logger, 
-        IUseCase<TInput, TOutput> useCase,
+        IHandler<TInput, TOutput> useCase,
         string useCaseName) 
     { 
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -29,11 +29,11 @@ public class LoggingDecorator<TInput, TOutput, TOutputValue> : IUseCase<TInput, 
         this.useCaseName = useCaseName ?? throw new ArgumentNullException(nameof(useCaseName));
     }
     
-    public async Task<TOutput> ExecuteAsync(TInput input, CancellationToken ct)
+    public async Task<TOutput> HandleAsync(TInput input, CancellationToken ct)
     {
         LogBefore(input);
 
-        var result = await _useCase.ExecuteAsync(input, ct);
+        var result = await _useCase.HandleAsync(input, ct);
 
         LogAfter(input, result);
 

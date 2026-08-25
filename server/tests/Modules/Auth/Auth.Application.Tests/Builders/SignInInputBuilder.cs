@@ -1,21 +1,21 @@
-using Auth.Application.UseCases;
+using Auth.Application.Commands;
 
 namespace Auth.Application.Tests.Builders;
 
-public class SignInInputBuilder
+public class SignInCommandBuilder
 {
     private string _email = "joshua@example.com";
     private string _password = "Senha@123";
     private string _name = "Joshua";
 
-    public SignInInputBuilder WithEmail(string email) { _email = email; return this; }
+    public SignInCommandBuilder WithEmail(string email) { _email = email; return this; }
 
-    public SignInInputBuilder WithPassword(string password) { _password = password; return this; }
+    public SignInCommandBuilder WithPassword(string password) { _password = password; return this; }
 
-    public SignInInputBuilder WithName(string name) { _name = name; return this; }
+    public SignInCommandBuilder WithName(string name) { _name = name; return this; }
 
-    public SignInInput Build()
+    public SignInCommand Build()
     {
-        return new SignInInput(_email, _name, _password);
+        return new SignInCommand(_email, _name, _password);
     }
 }
