@@ -16,15 +16,6 @@ public static class ILoggerExtensions
             Activity.Current?.TraceId.ToString());
     }
 
-    public static void LogStartingOperation(this ILogger logger, string operationName, object data)
-    {
-        logger.LogInformation(
-            "Operation {OperationName} started with data: {@Data}. TraceId: {TraceId}.",
-            operationName.ToLowerInvariant(),
-            data,
-            Activity.Current?.TraceId.ToString());
-    }
-
     public static IHandler<TInput, Result<TOutput>> DecorateWithLogger<THandler, TInput, TOutput>(
         this IHandler<TInput, Result<TOutput>> handler,
         IServiceProvider provider,

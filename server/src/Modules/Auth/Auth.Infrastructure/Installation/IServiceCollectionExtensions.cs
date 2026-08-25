@@ -1,8 +1,8 @@
 using Auth.Application.Interfaces;
 using Auth.Application.Interfaces.Services;
 using Auth.Domain.Interfaces.Services;
-using Auth.Infrastructure.ApplicationServices;
-using Auth.Infrastructure.DomainServices;
+using Auth.Infrastructure.Jwt;
+using Auth.Infrastructure.Hash;
 using Auth.Infrastructure.Persistance;
 using Auth.Infrastructure.Persistance.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Auth.Infrastructure.Installation.Extensions;
+namespace Auth.Infrastructure.Installation;
 
 internal static class IServiceCollectionExtensions
 {

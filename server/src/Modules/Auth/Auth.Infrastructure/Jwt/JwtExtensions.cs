@@ -5,9 +5,9 @@ using Core.Exceptions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Auth.Infrastructure.Installation.Extensions;
+namespace Auth.Infrastructure.Jwt;
 
-internal static class ConfigurationManagerExtensions
+internal static class JwtExtensions
 {
     internal static string GetJwtPublicKeyPemText(this IConfiguration configuration)
     {
@@ -45,13 +45,6 @@ internal static class ConfigurationManagerExtensions
             ?? throw new ConfigurationNotFound(audienceOptionName);
     }
 
-    internal static RsaSecurityKey GetRsaSecurityKey(this IConfiguration configuration)
-    {
-        var rsa = RSA.Create();
-        rsa.ImportFromPem(configuration.GetJwtPrivateKeyPemText());
-        return new RsaSecurityKey(rsa);
-    }
-
     internal static int GetJwtExpirationInMinutes(this IConfiguration configuration)
     {
         var expirationOptionName = $"{JwtOptions.AppSettingsSection}:{nameof(JwtOptions.ExpirationInMinutes)}";
@@ -63,5 +56,12 @@ internal static class ConfigurationManagerExtensions
             throw new InvalidDataException("JWT expiration must be greater than zero.");
 
         return value;
+    }
+
+    internal static RsaSecurityKey GetRsaSecurityKey(this IConfiguration configuration)
+    {
+        var rsa = RSA.Create();
+        rsa.ImportFromPem(configuration.GetJwtPrivateKeyPemText());
+        return new RsaSecurityKey(rsa);
     }
 }

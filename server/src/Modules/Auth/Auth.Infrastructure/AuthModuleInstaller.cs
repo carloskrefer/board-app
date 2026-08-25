@@ -1,4 +1,4 @@
-﻿using Auth.Infrastructure.Installation.Extensions;
+﻿using Auth.Infrastructure.Installation;
 using Auth.Infrastructure.Persistance;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

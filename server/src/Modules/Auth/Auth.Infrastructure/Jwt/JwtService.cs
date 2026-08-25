@@ -1,11 +1,11 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Auth.Application.Interfaces.Services;
-using Auth.Infrastructure.Installation.Extensions;
+using Auth.Infrastructure.Jwt;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Auth.Infrastructure.ApplicationServices;
+namespace Auth.Infrastructure.Jwt;
 
 public class JwtService : ICredentialsService
 {

@@ -2,7 +2,7 @@ using Auth.Api.Controllers;
 using Auth.Application.Commands;
 using Auth.Domain.Entities;
 using Auth.Domain.ValueObjects;
-using Core.Api.Builders;
+using Core.Api;
 using Contracts.Auth;
 using Microsoft.AspNetCore.Mvc;
 

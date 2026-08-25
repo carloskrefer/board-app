@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Contracts.Errors;
 
-namespace Core.Api.Builders;
+namespace Core.Api;
 
 public static class BadRequestConstants
 {

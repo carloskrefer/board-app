@@ -3,7 +3,7 @@ using Auth.Infrastructure.Logging;
 using Core.Infrastructure.Logging;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Auth.Infrastructure.Installation.Extensions;
+namespace Auth.Infrastructure.Installation;
 
 public static class HandlerInstallationExtensions
 {
