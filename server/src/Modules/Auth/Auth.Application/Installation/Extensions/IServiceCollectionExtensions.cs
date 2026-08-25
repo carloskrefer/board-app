@@ -1,5 +1,4 @@
 using Auth.Application.Commands;
-using Auth.Domain.Interfaces.Services;
 using Core.Logging.Decorators;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -19,14 +18,24 @@ public static class IServiceCollectionExtensions
         services.AddScoped<SignInCommandHandler>();
 
         services.AddScoped<IHandler<SignInCommand, Result<SignInOutput>>>(sp => {
-            var useCase = sp.GetRequiredService<SignInCommandHandler>();
+            var handler = sp.GetRequiredService<SignInCommandHandler>();
 
             var logger = 
                 sp.GetRequiredService<
                     ILogger<LoggingDecorator<SignInCommand, Result<SignInOutput>, SignInOutput>>
                 >();
             
-            return new LoggingDecorator<SignInCommand, Result<SignInOutput>, SignInOutput>(logger, useCase, "Sign In");
+            var projections = new Projections<SignInCommand, SignInOutput>
+            {
+                Input = input => new { input.Email, input.Name },
+                Output = output => new { output.UserId }
+            };
+
+            return new LoggingDecorator<SignInCommand, Result<SignInOutput>, SignInOutput>(
+                logger, 
+                handler, 
+                "Sign In", 
+                projections);
         });
     }
 
@@ -36,14 +45,24 @@ public static class IServiceCollectionExtensions
         services.AddScoped<LogInCommandHandler>();
 
         services.AddScoped<IHandler<LogInCommand, Result<LogInOutput>>>(sp => {
-            var useCase = sp.GetRequiredService<LogInCommandHandler>();
+            var handler = sp.GetRequiredService<LogInCommandHandler>();
 
             var logger = 
                 sp.GetRequiredService<
                     ILogger<LoggingDecorator<LogInCommand, Result<LogInOutput>, LogInOutput>>
                 >();
+
+            var projections = new Projections<LogInCommand, LogInOutput>
+            {
+                Input = input => new { input.Email },
+                Output = output => new { output.Email }
+            };
             
-            return new LoggingDecorator<LogInCommand, Result<LogInOutput>, LogInOutput>(logger, useCase, "Log In");
+            return new LoggingDecorator<LogInCommand, Result<LogInOutput>, LogInOutput>(
+                logger, 
+                handler, 
+                "Log In", 
+                projections);
         });
     }
 }

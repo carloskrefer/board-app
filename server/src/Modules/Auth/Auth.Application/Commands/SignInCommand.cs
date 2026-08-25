@@ -2,21 +2,11 @@
 using Auth.Application.Mappers.Extensions;
 using Auth.Domain.Entities;
 using Auth.Domain.Interfaces.Services;
-using Core.Logging.Decorators;
 
 namespace Auth.Application.Commands;
 
-public record SignInCommand(string Email, string Name, string Password) : Loggable
-{
-    public object ToLog() => new { Email, Name };
-    public object ToLogIdentity() => new { Email };
-}
-
-public record SignInOutput(Guid UserId) : Loggable
-{
-    public object ToLog() => new { UserId };
-    public object ToLogIdentity() => new { UserId };
-}
+public record SignInCommand(string Email, string Name, string Password);
+public record SignInOutput(Guid UserId);
 
 public class SignInCommandHandler : IHandler<SignInCommand, Result<SignInOutput>>
 {

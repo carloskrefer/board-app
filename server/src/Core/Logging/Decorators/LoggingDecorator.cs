@@ -4,36 +4,38 @@ using Microsoft.Extensions.Logging;
 
 namespace Core.Logging.Decorators;
 
-public interface Loggable {
-    public const string Empty = "Empty";
-    public object ToLog();
-    public object ToLogIdentity();
+public class Projections<TInput, TOutputValue>
+{
+    private static readonly string NO_PROJECTION = "No defined projection";
+    public Func<TInput, object> Input { get; set; } = input => NO_PROJECTION;
+    public Func<TOutputValue, object> Output { get; set; } = input => NO_PROJECTION;
 }
 
-public class LoggingDecorator<TInput, TOutput, TOutputValue> : IHandler<TInput, TOutput> 
-    where TInput : Loggable
+public class LoggingDecorator<TInput, TOutput, TOutputValue> : IHandler<TInput, TOutput>
     where TOutput : Result<TOutputValue>
-    where TOutputValue : Loggable
 {
-    private IHandler<TInput, TOutput> _useCase;
+    private IHandler<TInput, TOutput> _handler;
     private ILogger<LoggingDecorator<TInput, TOutput, TOutputValue>> _logger;
-    private readonly string useCaseName;
+    private readonly string _handlerName;
+    private Projections<TInput, TOutputValue> _projections;
 
     public LoggingDecorator(
         ILogger<LoggingDecorator<TInput, TOutput, TOutputValue>> logger, 
-        IHandler<TInput, TOutput> useCase,
-        string useCaseName) 
-    { 
+        IHandler<TInput, TOutput> handler,
+        string handlerName,
+        Projections<TInput, TOutputValue> projections) 
+    {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _useCase = useCase ?? throw new ArgumentNullException(nameof(useCase));
-        this.useCaseName = useCaseName ?? throw new ArgumentNullException(nameof(useCaseName));
+        _handler = handler ?? throw new ArgumentNullException(nameof(handler));
+        _handlerName = handlerName ?? throw new ArgumentNullException(nameof(handlerName));
+        _projections = projections ?? throw new ArgumentNullException(nameof(projections));
     }
     
     public async Task<TOutput> HandleAsync(TInput input, CancellationToken ct)
     {
         LogBefore(input);
 
-        var result = await _useCase.HandleAsync(input, ct);
+        var result = await _handler.HandleAsync(input, ct);
 
         LogAfter(input, result);
 
@@ -43,9 +45,9 @@ public class LoggingDecorator<TInput, TOutput, TOutputValue> : IHandler<TInput, 
     private void LogBefore(TInput input)
     {
         _logger.LogInformation(
-            "Use case {UseCaseName} started. Input identifier: {@Input}. TraceId: {TraceId}.", 
-            useCaseName, 
-            input.ToLogIdentity(), 
+            "Handler {UseCaseName} started. Input: {@Input}. TraceId: {TraceId}.", 
+            _handlerName, 
+            _projections.Input(input), 
             Activity.Current?.TraceId.ToString()); 
     }
 
@@ -54,12 +56,12 @@ public class LoggingDecorator<TInput, TOutput, TOutputValue> : IHandler<TInput, 
         if (result.IsFailure)
             _logger.LogInvalidData(
                 result.Error, 
-                input.ToLog());
+                _projections.Input(input));
         else
             _logger.LogInformation(
-                "Use case {UseCaseName} finished successfully. Output: {@Output}. TraceId: {TraceId}.", 
-                useCaseName, 
-                result.Value.ToLog(),
+                "Handler {UseCaseName} finished successfully. Output: {@Output}. TraceId: {TraceId}.", 
+                _handlerName, 
+                _projections.Output(result.Value),
                 Activity.Current?.TraceId.ToString());
     }
 }

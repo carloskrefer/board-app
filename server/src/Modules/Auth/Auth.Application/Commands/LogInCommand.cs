@@ -3,21 +3,11 @@ using Auth.Application.Interfaces.Services;
 using Auth.Domain.Entities;
 using Auth.Domain.Interfaces.Services;
 using Auth.Domain.ValueObjects;
-using Core.Logging.Decorators;
 
 namespace Auth.Application.Commands;
 
-public record LogInCommand(string Email, string Password, string IpAddress, string UserAgent) : Loggable
-{
-    public object ToLog() => new { Email };
-    public object ToLogIdentity() => new { Email };
-}
-
-public record LogInOutput(string Email, Guid SessionId, string CredentialsSerialized) : Loggable
-{
-    public object ToLog() => new { Email };
-    public object ToLogIdentity() => new { Email };
-}
+public record LogInCommand(string Email, string Password, string IpAddress, string UserAgent);
+public record LogInOutput(string Email, Guid SessionId, string CredentialsSerialized);
 
 public class LogInCommandHandler : IHandler<LogInCommand, Result<LogInOutput>>
 {
