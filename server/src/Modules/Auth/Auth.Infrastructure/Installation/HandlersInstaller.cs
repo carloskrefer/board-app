@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Auth.Infrastructure.Installation;
 
-public static class HandlerInstallationExtensions
+public static class HandlersInstaller
 {
     public static void AddHandlers(this IServiceCollection services)
     {

@@ -1,8 +1,4 @@
 using Auth.Application.Interfaces;
-using Auth.Application.Interfaces.Services;
-using Auth.Domain.Interfaces.Services;
-using Auth.Infrastructure.Jwt;
-using Auth.Infrastructure.Hash;
 using Auth.Infrastructure.Persistance;
 using Auth.Infrastructure.Persistance.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -12,20 +8,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Auth.Infrastructure.Installation;
 
-internal static class IServiceCollectionExtensions
+internal static class PersistanceInstaller
 {
-
-    public static void AddApplicationServicesImplementations(this IServiceCollection services)
-    {
-        services.AddScoped<ICredentialsService, JwtService>();
-    } 
-
-
-    public static void AddDomainServicesImplementations(this IServiceCollection services)
-    {
-        services.AddScoped<IPasswordHasher, PasswordHasher>();
-    }
-
     internal static void AddAuthDbContext(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("Default");
