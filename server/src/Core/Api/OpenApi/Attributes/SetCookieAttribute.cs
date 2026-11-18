@@ -57,7 +57,7 @@ public class SetCookieAttribute : Attribute
             cookieParts.Add($"SameSite={SameSiteMode}");
 
         if (DaysExpiration >= 0)
-            cookieParts.Add($"Expiration=<date-after-{DaysExpiration}-days>");
+            cookieParts.Add($"Expires=<date-after-{DaysExpiration}-days>");
 
         if (!string.IsNullOrEmpty(Path))
             cookieParts.Add($"Path={Path}");
