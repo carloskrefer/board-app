@@ -1,18 +1,9 @@
-
-
-using App.DependencyInjection.Extensions;
-using Auth.Infrastructure;
 using Microsoft.IdentityModel.Tokens;
 
-namespace App.DependencyInjection;
+namespace App.Authentication;
 
-public static class DependencyInjection
+public static class AddAuthenticationExtensions
 {
-    public static void AddModules(this WebApplicationBuilder builder)
-    {
-        builder.Services.AddAuthModule(builder.Configuration);
-    }
-
     internal static void AddAuthentication(this WebApplicationBuilder builder)
     {
         builder.Services.AddAuthentication()

@@ -3,6 +3,7 @@ using Auth.Application.Tests.Mocks;
 using Auth.Domain.Entities;
 using Auth.Domain.ValueObjects;
 using Auth.Application.Tests.Builders.Commands;
+using Microsoft.EntityFrameworkCore;
 
 namespace Auth.Application.Tests.UseCases;
 
@@ -76,16 +77,14 @@ public class SignInCommandHandlerTests
     {
         var unitOfWork = new AuthUnitOfWorkMock()
         {
-            CommitAsyncHandler = (_, _) => Task.FromResult(Result.Failure<int>(UnitOfWorkErrors.DatabaseError))
+            CommitAsyncHandler = (_, _) => throw new DbUpdateException()
         };
 
         var input = new SignInCommandBuilder().Build();
         var service = new SignInCommandHandlerBuilder().WithUnitOfWork(unitOfWork).Build();
 
-        var result = await service.HandleAsync(input, CancellationToken.None);
-
-        Assert.False(result.IsSuccess);
-        Assert.Equal(UnitOfWorkErrors.DatabaseError, result.Error);
+        await Assert.ThrowsAsync<DbUpdateException>(
+            async () => await service.HandleAsync(input, CancellationToken.None));
     }
 
     [Fact]

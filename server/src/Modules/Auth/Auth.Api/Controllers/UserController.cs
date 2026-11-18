@@ -1,69 +1,111 @@
 ﻿using Auth.Api.Mappers.Extensions;
+using Auth.Api.Utils;
+using Auth.Api.Validators;
 using Auth.Application.Commands;
 using Contracts.Auth;
-using Contracts.Errors;
+using Core.Api;
+using Core.Api.OpenApi;
+using Core.Api.OpenApi.Attributes;
+using Core.Api.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Auth.Api.Controllers;
 
-
 [ApiController]
+[Tags(Tags.Auth)]
 [Route("/api/users")]
-public class UserController : ControllerBase
+public class UserController(
+    IHandler<SignInCommand, Result<SignInOutput>> signInCommandHandler,
+    IHandler<LogInCommand, Result<LogInOutput>> logInCommandHandler,
+    IHandler<LogOutCommand, Result<LogOutOutput>> logOutCommandHandler,
+    ProblemResultFactory2 problemResultFactory) : ControllerBase
 {
-    private readonly IHandler<SignInCommand, Result<SignInOutput>> _signInCommandHandler;
-    private readonly IHandler<LogInCommand, Result<LogInOutput>> _logInCommandHandler;
-    public UserController(
-        IHandler<SignInCommand, Result<SignInOutput>> signInCommandHandler,
-        IHandler<LogInCommand, Result<LogInOutput>> logInCommandHandler)
-    {
-        _signInCommandHandler = signInCommandHandler ?? throw new ArgumentNullException(nameof(SignInCommandHandler));
-        _logInCommandHandler = logInCommandHandler ?? throw new ArgumentNullException(nameof(LogInCommandHandler));
-    }
+    // TODO: Fazer os outros serem "?" também os outros requests.
+    // TODO: Anotar num architectural decision sobre essa escolha de desativar a validação automática do model state,
+    // pq o sign in request é tudo "?" os objetos...
+    // TODO: rewrite tests considering the null values and stuff.
 
+    /// <summary>
+    /// Registers a new user.
+    /// </summary>
     [HttpPost]
-    [ProducesResponseType(201, Type=typeof(SignInResponse))]
-    [ProducesResponseType<CustomProblemDetails>(400)]
-    [Consumes("application/json")]
-    [Produces("application/problem+json")]
-    public async Task<IActionResult> SignIn([FromBody] SignInRequest request, CancellationToken ct)
+    [ProducesResponseType<SignInResponse>(StatusCodes.Status201Created)]
+    public async Task<IActionResult> SignIn([FromBody] SignInRequest? request, CancellationToken ct)
     {
-        var result = await _signInCommandHandler.HandleAsync(request.ToSignInCommand(), ct);
+        if (!request.Validate(out var errors))
+            return problemResultFactory.CreateBadRequest(errors);
+
+        var result = await signInCommandHandler.HandleAsync(request.ToSignInCommand(), ct);
 
         if (result.IsFailure)
-            return request.ToBadRequest(this, result.Error);
+            return result.Error.ToResponse(request, problemResultFactory);
 
         var responseBody = result.Value.ToSignInResponse();
 
         return Created($"/users/{result.Value.UserId}", responseBody);
     }
 
+    // TODO: Continuar checando essa questão da documentação do swagger
+    // TODO: Documentar no OpenAPI o header de refresh token via cookie. No endpoint de loguot também.
+
+    /// <summary>
+    /// Logs user in with the provided credentials.
+    /// </summary>
     [HttpPost("login")]
-    [ProducesResponseType(200, Type=typeof(LogInResponse))]
-    [ProducesResponseType<CustomProblemDetails>(400)]
-    [Consumes("application/json")]
-    [Produces("application/problem+json")]
+    [SetCookie(
+        whenStatusCode: StatusCodes.Status200OK,
+        key: "refreshToken",
+        value: "<sessionId>",
+        description: "Refresh token for maintaining user session.",
+        isHttpOnly: true,
+        isSecure: true,
+        sameSiteMode: Microsoft.Net.Http.Headers.SameSiteMode.Lax,
+        daysExpiration: 7,
+        path: "/api/users",
+        required: true
+    )]
+    [ProducesResponseType<LogInResponse>(StatusCodes.Status200OK)]
     public async Task<IActionResult> LogIn([FromBody] LogInRequest request, CancellationToken ct)
     {
+        if (!request.Validate(out var errors))
+            return problemResultFactory.CreateBadRequest(errors);
+
         var command = request.ToLogInCommand(
-            ipAddress: HttpContext.Connection.RemoteIpAddress?.ToString(), 
+            ipAddress: HttpContext.Connection.RemoteIpAddress?.ToString(),
             userAgent: HttpContext.Request.Headers["User-Agent"].ToString());
 
-        var result = await _logInCommandHandler.HandleAsync(command, ct);
+        var result = await logInCommandHandler.HandleAsync(command, ct);
 
         if (result.IsFailure)
-            return request.ToBadRequest(this, result.Error);
+            return result.Error.ToResponse(request, problemResultFactory);
 
-        result.Value.AddRefreshTokenCookie(HttpContext.Response.Cookies);
+        HttpContext.Response.Cookies.AddRefreshTokenCookie(result.Value.SessionId);
 
         return Ok(result.Value.ToLogInResponse());
     }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetUser(CancellationToken ct)
+    // TODO: Check if there is a parameter for the cookie. Even if not, this needs to be documented for OpenAPI.    
+
+    /// <summary>
+    /// Logs user out and invalidates the current session.
+    /// </summary>
+    [HttpPost("logout")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> LogOut(CancellationToken ct)
     {
-        // Implementation for getting a user by ID
-        return Ok();
+        // TODO: Check if I should create Get methods for these 2
+        var command = new LogOutCommand(
+            UserId: Guid.Parse(User.FindFirst("sub")?.Value ?? throw new InvalidOperationException("User ID not found in claims.")),
+            SessionId: Guid.Parse(Request.Cookies["refreshToken"] ?? throw new InvalidOperationException("Refresh token cookie not found.")));
+
+        var result = await logOutCommandHandler.HandleAsync(command, ct);
+
+        if (result.IsFailure)
+            return command.ToErrorResponse(HttpContext, ProblemDetailsFactory, result.Error);
+
+        HttpContext.Response.Cookies.DeleteRefreshTokenCookie();
+
+        return NoContent();
     }
 }

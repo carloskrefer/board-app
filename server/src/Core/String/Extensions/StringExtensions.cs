@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace Core.String.Extensions;
 
 public static class StringExtensions
@@ -15,6 +17,7 @@ public static class StringExtensions
 
     public static string FromPascalCaseToCamelCase(this string text) => FirstCharToLower(text);
 
+    // Move this to String Predicates
     public static bool HasAtLeastOneSpecialCharacter(this string text) => 
         text.Any(c => char.IsSymbol(c) || char.IsPunctuation(c));
 
@@ -23,4 +26,10 @@ public static class StringExtensions
         text.Any(char.IsUpper) && text.Any(char.IsLower);
 
     public static bool HasAtLeastOneNumber(this string text) => text.Any(char.IsNumber);
+
+    public static bool HasAtLeastOneLetterOrNumber(this string text) =>
+        text.Any(char.IsLetter) || text.Any(char.IsNumber);
+
+    public static string ReplaceMultipleWhiteSpacesWithSingleSpace(this string text) => 
+        Regex.Replace(text.Trim(), @"\s+", " ");
 }

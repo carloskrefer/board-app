@@ -5,6 +5,7 @@ using Auth.Application.Tests.Builders.Commands;
 using Auth.Application.Tests.Builders.Domain.Entities;
 using Auth.Application.Commands;
 using Auth.Domain.ValueObjects;
+using Microsoft.EntityFrameworkCore;
 
 namespace Auth.Application.Tests.UseCases;
 
@@ -80,7 +81,7 @@ public class LogInCommandHandlerTests
     }
 
     [Fact]
-    public async Task Should_Return_NotFound_Error_When_Email_Does_Not_Exist()
+    public async Task Should_Return_EmailNotFound_Error_When_Email_Does_Not_Exist()
     {
         UserRepositoryMock repository = new() {
             GetUserByEmailAsyncHandler = (_, _) => Task.FromResult<User?>(null)
@@ -92,7 +93,7 @@ public class LogInCommandHandlerTests
         var result = await builder.Build().HandleAsync(input, CancellationToken.None);
 
         Assert.False(result.IsSuccess);
-        Assert.Equal(UserErrors.NotFound, result.Error);
+        Assert.Equal(UserErrors.EmailNotFound, result.Error);
     }
 
     [Fact]
@@ -131,7 +132,7 @@ public class LogInCommandHandlerTests
 
         var unitOfWork = new AuthUnitOfWorkMock()
         {
-            CommitAsyncHandler = (_, _) => Task.FromResult(Result.Failure<int>(UnitOfWorkErrors.DatabaseError))
+            CommitAsyncHandler = (_, _) => throw new DbUpdateException()
         };
 
         var service = new LogInCommandHandlerBuilder().WithRepository(repository).WithUnitOfWork(unitOfWork).Build();
@@ -142,10 +143,8 @@ public class LogInCommandHandlerTests
             IpAddress: "127.0.0.1", 
             UserAgent: "Mozilla/5.0");
 
-        var result = await service.HandleAsync(input, CancellationToken.None);
-
-        Assert.False(result.IsSuccess);
-        Assert.Equal(UnitOfWorkErrors.DatabaseError, result.Error);
+        await Assert.ThrowsAsync<DbUpdateException>(
+            async () => await service.HandleAsync(input, CancellationToken.None));
     }
 
     [Fact]

@@ -29,4 +29,12 @@ public class UserRepositoryMock : IUserRepository
         Tracker.Record([email, ct]);
         return IsEmailRegisteredAsyncHandler(email, ct);
     }
+
+    public Func<Guid, CancellationToken, Task<User?>> GetUserByIdAsyncHandler { get; set; } = 
+        (_, _) => Task.FromResult<User?>(null);
+    public Task<User?> GetUserByIdAsync(Guid userId, CancellationToken ct)
+    {
+        Tracker.Record([userId, ct]);
+        return GetUserByIdAsyncHandler(userId, ct);
+    }
 }

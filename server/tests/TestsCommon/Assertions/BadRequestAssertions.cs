@@ -1,70 +1,75 @@
 using System.Net.Http.Json;
 using Contracts.Errors;
+using Core.Api;
 
 namespace TestsCommon.Assertions;
 
 public static class BadRequestAssertions
 {
-    /// <summary>
-    /// Asserts a "general response", meaning it has an empty errors array (i.e. the specific application error is only
-    /// described by a specific title and detail property values).
-    /// </summary>
-    public static async Task AssertGeneralResponse(
+    public static async Task<ApiProblemDetails> AssertResponse(
         HttpResponseMessage response,
         string expectedInstance,
-        BaseError expectedError)
+        IEnumerable<DetailedApiError> expectedErrors)
     {
-        var body = await AssertResponseExceptErrorsArrayAndReturnBody(
-            response, 
-            expectedInstance, 
-            expectedError.Code, 
-            expectedError.Message);
+        var statusCode = AssertStatus(response);
+        var traceId = AssertHeaders(response);
+        return await AssertBodyAsync(response, expectedInstance, expectedErrors, statusCode, traceId);
+    }
+
+    private static int AssertStatus(HttpResponseMessage response)
+    {
+        int status = (int) response.StatusCode;
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
+        return status;
+    }
+
+    private static string AssertHeaders(HttpResponseMessage response)
+    {
+        AssertContentTypeHeader(response);
+        return AssertTraceIdHeader(response);
+    }
         
-        Assert.Empty(body.Errors);
-    }
 
-    /// <summary>
-    /// Asserts a "detailed response", meaning the errors array contains one or more detailed errors, while the
-    /// title and detail properties are set to the default values.
-    /// </summary>
-    public static async Task AssertDetailedResponse(
-        HttpResponseMessage response,
-        string expectedInstance,
-        IEnumerable<DetailedError> expectedErrors)
+    private static void AssertContentTypeHeader(HttpResponseMessage response)
     {
-        var body = await AssertResponseExceptErrorsArrayAndReturnBody(response, expectedInstance);
-        AssertErrorsArray(expectedErrors, body.Errors);
+        var contentType = response.Content.Headers.GetValues("Content-Type").FirstOrDefault();
+        Assert.Contains("application/problem+json", contentType);   
     }
 
-    public static void AssertErrorsArray(
-        IEnumerable<DetailedError> expectedErrors,
-        IEnumerable<DetailedError> actualErrors)
+    private static async Task<ApiProblemDetails> AssertBodyAsync(
+        HttpResponseMessage response, 
+        string expectedInstance,
+        IEnumerable<DetailedApiError> expectedErrors,
+        int expectedStatusCode,
+        string expectedTraceId)
+    {
+        var body = await response.Content.ReadFromJsonAsync<ApiProblemDetails>();
+
+        Assert.NotNull(body);
+        Assert.Equal(BadRequestConstants.Title, body.Title);
+        Assert.Equal(BadRequestConstants.DetailForErrorsExtension, body.Detail);
+        Assert.Equal(expectedStatusCode, body.Status);
+        Assert.Equal(expectedInstance, body.Instance);
+        AssertErrorsExtension(expectedErrors, body.Errors);
+        Assert.Equal(expectedTraceId, body.TraceId);
+
+        return body;
+    }
+
+    private static string AssertTraceIdHeader(HttpResponseMessage response)
+    {
+        var traceId = response.Headers.GetValues("X-Trace-Id").FirstOrDefault();
+
+        Assert.NotNull(traceId);
+        Assert.NotEmpty(traceId);
+
+        return traceId;
+    }
+
+    public static void AssertErrorsExtension(
+        IEnumerable<DetailedApiError> expectedErrors,
+        IEnumerable<DetailedApiError> actualErrors)
     {
         Assert.True(expectedErrors.Order().SequenceEqual(actualErrors.Order()));
-    }
-
-    public static async Task<CustomProblemDetails> AssertResponseExceptErrorsArrayAndReturnBody(
-        HttpResponseMessage response,
-        string expectedInstance,
-        string expectedTitle = "One or more validation errors occurred.",
-        string expectedDetail = "See the errors property for details.")
-    {
-        var statusCode = response.StatusCode;
-        Assert.Equal(System.Net.HttpStatusCode.BadRequest, statusCode);
-
-        var contentType = response.Content.Headers.GetValues("Content-Type").FirstOrDefault();
-        Assert.Contains("application/problem+json", contentType);
-
-        var body = await response.Content.ReadFromJsonAsync<CustomProblemDetails>();
-        Assert.NotNull(body);
-        Assert.Equal(expectedTitle, body.Title);
-        Assert.Equal(expectedDetail, body.Detail);
-        Assert.Equal((int) statusCode, body.Status);
-        Assert.Equal(expectedInstance, body.Instance);
-
-        var traceId = response.Headers.GetValues("X-Trace-Id").FirstOrDefault();
-        Assert.Equal(traceId, body.TraceId);
-        
-        return body;
     }
 }

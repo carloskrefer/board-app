@@ -9,53 +9,40 @@ namespace Auth.Application.Commands;
 public record LogInCommand(string Email, string Password, string IpAddress, string UserAgent);
 public record LogInOutput(string Email, Guid SessionId, string CredentialsSerialized);
 
-public class LogInCommandHandler : IHandler<LogInCommand, Result<LogInOutput>>
+public class LogInCommandHandler(
+    IUserRepository userRepository, 
+    IAuthUnitOfWork unitOfWork, 
+    IPasswordHasher passwordHasher,
+    ICredentialsService credentialsService) : IHandler<LogInCommand, Result<LogInOutput>>
 {
-    private readonly IUserRepository _userRepository;
-    private readonly IAuthUnitOfWork _unitOfWork;
-    private readonly IPasswordHasher _passwordHasher;
-    private readonly ICredentialsService _credentialsService;
-
-    public LogInCommandHandler(
-        IUserRepository userRepository, 
-        IAuthUnitOfWork unitOfWork, 
-        IPasswordHasher passwordHasher,
-        ICredentialsService credentialsService)
+    public async Task<Result<LogInOutput>> HandleAsync(LogInCommand command, CancellationToken ct)
     {
-        _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        _passwordHasher = passwordHasher ?? throw new ArgumentNullException(nameof(passwordHasher));
-        _credentialsService = credentialsService ?? throw new ArgumentNullException(nameof(credentialsService));
-    }
-
-    public async Task<Result<LogInOutput>> HandleAsync(LogInCommand input, CancellationToken ct)
-    {
-        var email = Email.Create(input.Email);
+        var email = Email.Create(command.Email);
 
         if (email.IsFailure)
             return email.Error;
 
-        var password = Password.Create(input.Password);
+        var password = Password.Create(command.Password);
 
         if (password.IsFailure)
             return password.Error;
 
-        var user = await _userRepository.GetUserByEmailAsync(email.Value, ct);
+        var user = await userRepository.GetUserByEmailAsync(email.Value, ct);
 
         if (user is null)
-            return UserErrors.NotFound;
+            return UserErrors.EmailNotFound;
 
-        var sessionResult = user.LogIn(input.Password, _passwordHasher, input.IpAddress, input.UserAgent);
+        var sessionResult = user.LogIn(command.Password, passwordHasher, command.IpAddress, command.UserAgent);
 
         if (sessionResult.IsFailure)
             return sessionResult.Error;
         
-        var commitResult = await _unitOfWork.CommitAsync([user], ct);
+        var commitResult = await unitOfWork.CommitAsync([user], ct);
 
         if (commitResult.IsFailure)
             return commitResult.Error;
 
-        var credentials = _credentialsService.GenerateSerializedCredentials(user.Id, user.Email.Value, user.Name.Value);
+        var credentials = credentialsService.GenerateSerializedCredentials(user.Id, user.Email.Value, user.Name.Value);
 
         return new LogInOutput(user.Email.Value, sessionResult.Value.Id, credentials);
     }

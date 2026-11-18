@@ -4,8 +4,10 @@ using Auth.Infrastructure.Settings;
 using Core.Exceptions;
 using Microsoft.IdentityModel.Tokens;
 
-namespace App.DependencyInjection.Extensions;
+namespace App.Authentication;
 
+// TODO: I think this should just get the injected Options, remove it from the Auth.Api and bring it to App
+// TODO: Rename this thing too.
 internal static class ConfigurationManagerExtensions
 {
     internal static string GetJwtPublicKeyPemText(this IConfiguration configuration)

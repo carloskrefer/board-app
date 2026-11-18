@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Core.String.Extensions;
 
 namespace Auth.Domain.ValueObjects;
 
@@ -6,7 +7,7 @@ public sealed record Name(string Value)
 {
     public static Result<Name> Create(string value)
     {
-        var valueCleaned = Regex.Replace(value.Trim(), @"\s+", " ");
+        var valueCleaned = value.ReplaceMultipleWhiteSpacesWithSingleSpace();
 
         if (string.IsNullOrWhiteSpace(valueCleaned))
             return NameErrors.Empty;
@@ -14,7 +15,7 @@ public sealed record Name(string Value)
         if (valueCleaned.Length > 100)
             return NameErrors.TooLong;
 
-        if (!Regex.IsMatch(valueCleaned, @"[a-zA-Z0-9]"))
+        if (!valueCleaned.HasAtLeastOneLetterOrNumber())
             return NameErrors.OnlySpecialCharacters;
 
         return new Name(valueCleaned);

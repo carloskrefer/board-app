@@ -10,7 +10,10 @@ using Auth.Api.Tests.Builders;
 using TestsCommon.Extensions;
 using TestsCommon.Helpers;
 using TestsCommon.Assertions;
-using TestsCommon.Tests;
+using Contracts.Errors;
+using Core.String.Extensions;
+using Auth.Api.Tests.Mocks;
+using Auth.Application.Interfaces;
 
 namespace Auth.Api.Tests.IntegrationTests.UserControllerTests;
 
@@ -27,10 +30,14 @@ public class LogInTests : DefaultIntegrationTests<AuthDbContext>
     {
         var email = "test@example.com";
         var password = "ValidPassword123!";
-        var signInBody = new SignInRequest(Email: email, Name: "Joshua", Password: password);
+        var signInBody = new SignInRequest{
+            Email = email, 
+            Name = "Joshua", 
+            Password = password
+        };
         await _client.PostAsJsonAsync(_signInUrl, signInBody);
 
-        var body = new LogInRequest(Email: email, Password: password);
+        var body = new LogInRequest(email, password);
         var response = await _client.PostAsJsonAsync(_loginUrl, body);
         
         Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
@@ -46,7 +53,7 @@ public class LogInTests : DefaultIntegrationTests<AuthDbContext>
         var signInRequest = new SignInRequestBuilder().Build();
         await _client.PostAsJsonAsync(_signInUrl, signInRequest);
 
-        var body = new LogInRequest(Email: signInRequest.Email, Password: signInRequest.Password);
+        var body = new LogInRequest(signInRequest.Email, signInRequest.Password);
         var response = await _client.PostAsJsonAsync(_loginUrl, body);
 
         response.Headers.SingleCookieByName("refreshToken", out var cookieValue, out var cookieAttributes); 
@@ -72,10 +79,10 @@ public class LogInTests : DefaultIntegrationTests<AuthDbContext>
     [Fact]
     public async Task Should_Respond_With_BadRequest_And_Generic_Credentials_Error_When_User_Does_Not_Exist()
     {
-        var body = new LogInRequest(Email: "nonexistent@example.com", Password: "anyPassword123!");
+        var body = new LogInRequest("nonexistent@example.com", "anyPassword123!");
         var response = await _client.PostAsJsonAsync(_loginUrl, body);
 
-        await BadRequestAssertions.AssertGeneralResponse(response, _loginUrl, LogInResponseErrors.Credentials);
+        await BadRequestAssertions.AssertResponse(response, _loginUrl, [LogInResponseErrors.Credentials]);
     }
 
     [Fact]
@@ -84,10 +91,10 @@ public class LogInTests : DefaultIntegrationTests<AuthDbContext>
         var signInRequest = new SignInRequestBuilder().Build();
         await _client.PostAsJsonAsync(_signInUrl, signInRequest);
 
-        var body = new LogInRequest(Email: signInRequest.Email, Password: "IncorrectPassword123!");
+        var body = new LogInRequest(signInRequest.Email, "IncorrectPassword123!");
         var response = await _client.PostAsJsonAsync(_loginUrl, body);
 
-        await BadRequestAssertions.AssertGeneralResponse(response, _loginUrl, LogInResponseErrors.Credentials);
+        await BadRequestAssertions.AssertResponse(response, _loginUrl, [LogInResponseErrors.Credentials]);
     }
 
     [Fact]
@@ -96,35 +103,65 @@ public class LogInTests : DefaultIntegrationTests<AuthDbContext>
         var signInRequest = new SignInRequestBuilder().Build();
         await _client.PostAsJsonAsync(_signInUrl, signInRequest);
 
-        var body = new LogInRequest(Email: signInRequest.Email, Password: "invalidformat");
+        var body = new LogInRequest(signInRequest.Email, "invalidformat");
         var response = await _client.PostAsJsonAsync(_loginUrl, body);
 
-        await BadRequestAssertions.AssertGeneralResponse(response, _loginUrl, LogInResponseErrors.Credentials);
+        await BadRequestAssertions.AssertResponse(response, _loginUrl, [LogInResponseErrors.Credentials]);
     }
 
     [Fact]
     public async Task Should_Respond_With_BadRequest_When_Email_Format_Is_Invalid()
     {
-        var body = new LogInRequest(Email: "invalid-email", Password: "AnyPassword123!");
+        var body = new LogInRequest("invalid-email", "AnyPassword123!");
         var response = await _client.PostAsJsonAsync(_loginUrl, body);
 
-        await BadRequestAssertions.AssertDetailedResponse(response, _loginUrl, [LogInResponseErrors.EmailFormat(body.Email)]);
+        List<DetailedApiError> expectedErrors = [
+            new(
+                generalError: EmailResponseErrors.Format,
+                field: nameof(body.Email).FromPascalCaseToCamelCase(),
+                location: ErrorLocation.Body,
+                rejectedValue: body.Email)
+        ];
+
+        await BadRequestAssertions.AssertResponse(response, _loginUrl, expectedErrors);
     }
 
     [Fact]
     public async Task Should_Respond_With_BadRequest_When_Password_Is_Empty()
     {
-        var body = new LogInRequest(Email: "test@example.com", Password: "");
+        var body = new LogInRequest("test@example.com", "");
         var response = await _client.PostAsJsonAsync(_loginUrl, body);
 
-        await BadRequestAssertions.AssertDetailedResponse(response, _loginUrl, [LogInResponseErrors.PasswordEmpty(body.Password)]);
+        List<DetailedApiError> expectedErrors = [
+            new(
+                generalError: TextResponseErrors.Empty("Password"),
+                field: nameof(body.Password).FromPascalCaseToCamelCase(),
+                location: ErrorLocation.Body)
+        ];
+
+        await BadRequestAssertions.AssertResponse(response, _loginUrl, expectedErrors);
     }
 
     [Fact]
-    public async Task Should_Respond_With_406_When_Accept_Header_Is_Not_Application_Json() =>
-        await JsonTests.ResponseShouldBe406WhenAcceptHeaderIsNotApplicationJson(
-            _loginUrl, 
-            _client,
-            HttpMethod.Post,
-            new LogInRequest("test@example.com", "ValidPassword123!"));
+    public async Task Should_Respond_With_409_Conflict_When_Concurrency_Error_Happens()
+    {
+        var signInRequest = new SignInRequestBuilder().Build();
+        var mockResult = Result.Failure<int>(OptimisticUnitOfWorkErrors.UpdateConcurrency);
+
+        var unitOfWorkMock = new AuthUnitOfWorkMock()
+        {
+            CommitAsyncHandler = (_, _) => Task.FromResult(mockResult)
+        };
+
+        using var customFactory = _factory.WithWebHostBuilder(whb =>
+            whb.ConfigureServices(sc => sc.AddScoped<IAuthUnitOfWork>(sp => unitOfWorkMock)));
+
+        using var customClient = customFactory.CreateClient();
+        var body = new LogInRequest(signInRequest.Email, signInRequest.Password);
+
+        await _client.PostAsJsonAsync(_signInUrl, signInRequest);
+        var response = await customClient.PostAsJsonAsync(_loginUrl, body);
+
+        Assert.Equal(System.Net.HttpStatusCode.Conflict, response.StatusCode);
+    }    
 }

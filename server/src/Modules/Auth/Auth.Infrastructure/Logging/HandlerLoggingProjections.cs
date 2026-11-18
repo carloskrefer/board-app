@@ -18,4 +18,10 @@ public static class HandlerLoggingProjections
             Input = input => new { input.Email },
             Output = output => new { output.Email }
         };
+
+    public static Projections<LogOutCommand, LogOutOutput> LogOutCommand => 
+        new Projections<LogOutCommand, LogOutOutput>
+        {
+            Input = input => new { input.UserId }
+        };
 }

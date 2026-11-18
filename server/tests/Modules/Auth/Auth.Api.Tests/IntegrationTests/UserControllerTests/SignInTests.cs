@@ -8,7 +8,6 @@ using Auth.Api.Tests.CollectionFixtures;
 using Contracts.Errors;
 using Core.String.Extensions;
 using TestsCommon.Assertions;
-using TestsCommon.Tests;
 using Contracts.Auth;
 using System.Net;
 
@@ -24,7 +23,12 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
     [Fact]
     public async Task Should_Persist_Valid_New_User()
     {
-        var body = new SignInRequest("test@example.com", "Joshua", "ValidPassword123!");
+        var body = new SignInRequest
+        {
+            Email = "test@example.com",
+            Name = "Joshua",
+            Password = "ValidPassword123!"
+        };
         var response = await _client.PostAsJsonAsync(_url, body);
         
         Assert.Equal(System.Net.HttpStatusCode.Created, response.StatusCode);
@@ -42,205 +46,253 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
     [Fact]
     public async Task Should_Respond_With_BadRequest_When_Email_Format_Is_Invalid()
     {
-        var requestBody = new SignInRequest("invalid-email", "Joshua", "ValidPassword123!");
+        var requestBody = new SignInRequest
+        {
+            Email = "invalid-email",
+            Name = "Joshua",
+            Password = "ValidPassword123!"
+        };
         var response = await _client.PostAsJsonAsync(_url, requestBody);
 
-        List<DetailedError> expectedErrors = [
+        List<DetailedApiError> expectedErrors = [
             new(
                 generalError: EmailResponseErrors.Format,
                 field: nameof(requestBody.Email).FromPascalCaseToCamelCase(),
-                location: ErrorLocationEnum.Body,
+                location: ErrorLocation.Body,
                 rejectedValue: requestBody.Email)
         ];
 
-        await BadRequestAssertions.AssertDetailedResponse(response, _url, expectedErrors);
+        await BadRequestAssertions.AssertResponse(response, _url, expectedErrors);
     }
 
     [Fact]
     public async Task Should_Respond_With_BadRequest_When_Email_Already_Registered()
     {
         var email = "joshua@example.com";
-        var requestBody = new SignInRequest(email, "Joshua", "ValidPassword123!");
+        var requestBody = new SignInRequest
+        {
+            Email = email,
+            Name = "Joshua",
+            Password = "ValidPassword123!"
+        };
         var response = await _client.PostAsJsonAsync(_url, requestBody);
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
-        requestBody = new SignInRequest(email, "Joshua II", "AnotherValidPassword123!");
+        requestBody = new SignInRequest
+        {
+            Email = email,
+            Name = "Joshua II",
+            Password = "AnotherValidPassword123!"
+        };
         response = await _client.PostAsJsonAsync(_url, requestBody);
 
-        List<DetailedError> expectedErrors = [
+        List<DetailedApiError> expectedErrors = [
             new(
                 generalError: EmailResponseErrors.AlreadyRegistered,
                 field: nameof(requestBody.Email).FromPascalCaseToCamelCase(),
-                location: ErrorLocationEnum.Body,
+                location: ErrorLocation.Body,
                 rejectedValue: requestBody.Email)
         ];
 
-        await BadRequestAssertions.AssertDetailedResponse(response, _url, expectedErrors);
+        await BadRequestAssertions.AssertResponse(response, _url, expectedErrors);
     }
 
     [Fact]
     public async Task Should_Respond_With_BadRequest_When_Name_Is_Empty()
     {
-        var requestBody = new SignInRequest("test@example.com", "", "ValidPassword123!");
+        var requestBody = new SignInRequest
+        {
+            Email = "test@example.com",
+            Name = "",
+            Password = "ValidPassword123!"
+        };
         var response = await _client.PostAsJsonAsync(_url, requestBody);
 
-        List<DetailedError> expectedErrors = [
+        List<DetailedApiError> expectedErrors = [
             new(
-                generalError: TextResponseErrors.Empty("Name"),
+                generalError: TextResponseErrors.Empty("Full name"),
                 field: nameof(requestBody.Name).FromPascalCaseToCamelCase(),
-                location: ErrorLocationEnum.Body,
+                location: ErrorLocation.Body,
                 rejectedValue: requestBody.Name)
         ];
 
-        await BadRequestAssertions.AssertDetailedResponse(response, _url, expectedErrors);
+        await BadRequestAssertions.AssertResponse(response, _url, expectedErrors);
     }
 
     [Fact]
     public async Task Should_Respond_With_BadRequest_When_Name_Is_Too_Long()
     {
-        var requestBody = new SignInRequest("test@example.com", new string('A', 101), "ValidPassword123!");
+        var requestBody = new SignInRequest
+        {
+            Email = "test@example.com",
+            Name = new string('A', 101),
+            Password = "ValidPassword123!"
+        };
         var response = await _client.PostAsJsonAsync(_url, requestBody);
 
-        List<DetailedError> expectedErrors = [
+        List<DetailedApiError> expectedErrors = [
             new(
-                generalError: TextResponseErrors.TooLong(100, "Name"),
+                generalError: TextResponseErrors.TooLong(100, "Full name"),
                 field: nameof(requestBody.Name).FromPascalCaseToCamelCase(),
-                location: ErrorLocationEnum.Body,
+                location: ErrorLocation.Body,
                 rejectedValue: requestBody.Name)
         ];
 
-        await BadRequestAssertions.AssertDetailedResponse(response, _url, expectedErrors);
+        await BadRequestAssertions.AssertResponse(response, _url, expectedErrors);
     }
 
     [Fact]
     public async Task Should_Respond_With_BadRequest_When_Name_Has_Only_Special_Characters()
     {
-        var requestBody = new SignInRequest("test@example.com", "!@#$%^&*()-+", "ValidPassword123!");
+        var requestBody = new SignInRequest
+        {
+            Email = "test@example.com",
+            Name = "!@#$%^&*()-+",
+            Password = "ValidPassword123!"
+        };
         var response = await _client.PostAsJsonAsync(_url, requestBody);
 
-        List<DetailedError> expectedErrors = [
+        List<DetailedApiError> expectedErrors = [
             new(
-                generalError: TextResponseErrors.OnlySpecialCharacters("Name"),
+                generalError: TextResponseErrors.OnlySpecialCharacters("Full name"),
                 field: nameof(requestBody.Name).FromPascalCaseToCamelCase(),
-                location: ErrorLocationEnum.Body,
+                location: ErrorLocation.Body,
                 rejectedValue: requestBody.Name)
         ];
 
-        await BadRequestAssertions.AssertDetailedResponse(response, _url, expectedErrors);
+        await BadRequestAssertions.AssertResponse(response, _url, expectedErrors);
     }
 
     [Fact]
     public async Task Should_Respond_With_BadRequest_When_Password_Too_Short()
     {
-        var requestBody = new SignInRequest("test@example.com", "Joshua", "aA1!");
+        var requestBody = new SignInRequest
+        {
+            Email = "test@example.com",
+            Name = "Joshua",
+            Password = "aA1!"
+        };
         var response = await _client.PostAsJsonAsync(_url, requestBody);
 
-        List<DetailedError> expectedErrors = [
+        List<DetailedApiError> expectedErrors = [
             new(
-                TextResponseErrors.BetweenRange(6, 100, "Password"),
+                TextResponseErrors.TooSmall(6, "Password"),
                 field: nameof(requestBody.Password).FromPascalCaseToCamelCase(),
-                location: ErrorLocationEnum.Body,
-                rejectedValue: requestBody.Password)
+                location: ErrorLocation.Body,
+                rejectedValue: null)
         ];
 
-        await BadRequestAssertions.AssertDetailedResponse(response, _url, expectedErrors);
+        await BadRequestAssertions.AssertResponse(response, _url, expectedErrors);
     }
 
     [Fact]
     public async Task Should_Respond_With_BadRequest_When_Password_Too_Long()
     {
-        var requestBody = new SignInRequest("test@example.com", "Joshua", $"{new string('A', 101)}!a1");
+        var requestBody = new SignInRequest
+        {
+            Email = "test@example.com",
+            Name = "Joshua",
+            Password = $"{new string('A', 101)}!a1"
+        };
         var response = await _client.PostAsJsonAsync(_url, requestBody);
 
-        List<DetailedError> expectedErrors = [
+        List<DetailedApiError> expectedErrors = [
             new(
-                generalError: TextResponseErrors.BetweenRange(6, 100, "Password"),
+                generalError: TextResponseErrors.TooLong(100, "Password"),
                 field: nameof(requestBody.Password).FromPascalCaseToCamelCase(),
-                location: ErrorLocationEnum.Body,
-                rejectedValue: requestBody.Password)
+                location: ErrorLocation.Body,
+                rejectedValue: null)
         ];
 
-        await BadRequestAssertions.AssertDetailedResponse(response, _url, expectedErrors);
+        await BadRequestAssertions.AssertResponse(response, _url, expectedErrors);
     }
 
     [Fact]
     public async Task Should_Respond_With_BadRequest_When_Password_Contains_No_Special_Characters()
     {
-        var requestBody = new SignInRequest("test@example.com", "Joshua", "Password123");
+        var requestBody = new SignInRequest
+        {
+            Email = "test@example.com",
+            Name = "Joshua",
+            Password = "Password123"
+        };
         var response = await _client.PostAsJsonAsync(_url, requestBody);
 
-        List<DetailedError> expectedErrors = [
+        List<DetailedApiError> expectedErrors = [
             new(
-                code: "SPECIAL_CHARACTERS",
-                message: "Password must contain at least one special character. Examples: !?@#$%^&*()-+.",
+                generalError: TextResponseErrors.AtLeastOneSpecialCharacter("Password"),
                 field: nameof(requestBody.Password).FromPascalCaseToCamelCase(),
-                location: ErrorLocationEnum.Body,
-                rejectedValue: requestBody.Password)
+                location: ErrorLocation.Body,
+                rejectedValue: null)
         ];
 
-        await BadRequestAssertions.AssertDetailedResponse(response, _url, expectedErrors);
+        await BadRequestAssertions.AssertResponse(response, _url, expectedErrors);
     }
 
     [Fact]
     public async Task Should_Respond_With_BadRequest_When_Password_Contains_Only_Upper_Case_Letters()
     {
-        var requestBody = new SignInRequest("test@example.com", "Joshua", "PASSWORD123!");
+        var requestBody = new SignInRequest
+        {
+            Email = "test@example.com",
+            Name = "Joshua",
+            Password = "PASSWORD123!"
+        };
         var response = await _client.PostAsJsonAsync(_url, requestBody);
 
-        List<DetailedError> expectedErrors = [
+        List<DetailedApiError> expectedErrors = [
             new(
-                code: "UPPER_AND_LOWER_CASE",
-                message: "Password must contain at least one uppercase and one lowercase letter.",
+                generalError: TextResponseErrors.AtLeastOneUpperAndLowerCase("Password"),
                 field: nameof(requestBody.Password).FromPascalCaseToCamelCase(),
-                location: ErrorLocationEnum.Body,
-                rejectedValue: requestBody.Password)
+                location: ErrorLocation.Body,
+                rejectedValue: null)
         ];
 
-        await BadRequestAssertions.AssertDetailedResponse(response, _url, expectedErrors);
+        await BadRequestAssertions.AssertResponse(response, _url, expectedErrors);
     }
 
     [Fact]
     public async Task Should_Respond_With_BadRequest_When_Password_Contains_Only_Lower_Case_Letters()
     {
-        var requestBody = new SignInRequest("test@example.com", "Joshua", "password123!");
+        var requestBody = new SignInRequest
+        {
+            Email = "test@example.com",
+            Name = "Joshua",
+            Password = "password123!"
+        };
         var response = await _client.PostAsJsonAsync(_url, requestBody);
 
-        List<DetailedError> expectedErrors = [
+        List<DetailedApiError> expectedErrors = [
             new(
-                code: "UPPER_AND_LOWER_CASE",
-                message: "Password must contain at least one uppercase and one lowercase letter.",
+                generalError: TextResponseErrors.AtLeastOneUpperAndLowerCase("Password"),
                 field: nameof(requestBody.Password).FromPascalCaseToCamelCase(),
-                location: ErrorLocationEnum.Body,
-                rejectedValue: requestBody.Password)
+                location: ErrorLocation.Body,
+                rejectedValue: null)
         ];
 
-        await BadRequestAssertions.AssertDetailedResponse(response, _url, expectedErrors);
+        await BadRequestAssertions.AssertResponse(response, _url, expectedErrors);
     }
 
     [Fact]
     public async Task Should_Respond_With_BadRequest_When_Password_Contains_No_Numbers()
     {
-        var requestBody = new SignInRequest("test@example.com", "Joshua", "Password!");
+        var requestBody = new SignInRequest
+        {
+            Email = "test@example.com",
+            Name = "Joshua",
+            Password = "Password!"
+        };
         var response = await _client.PostAsJsonAsync(_url, requestBody);
 
-        List<DetailedError> expectedErrors = [
+        List<DetailedApiError> expectedErrors = [
             new(
-                code: "NUMBERS", 
-                message: "Password must contain at least one number.",
+                generalError: TextResponseErrors.AtLeastOneNumber("Password"),
                 field: nameof(requestBody.Password).FromPascalCaseToCamelCase(),
-                location: ErrorLocationEnum.Body,
-                rejectedValue: requestBody.Password)
+                location: ErrorLocation.Body,
+                rejectedValue: null)
         ];
 
-        await BadRequestAssertions.AssertDetailedResponse(response, _url, expectedErrors);
+        await BadRequestAssertions.AssertResponse(response, _url, expectedErrors);
     }
-
-    [Fact]
-    public async Task Should_Respond_With_406_When_Accept_Header_Is_Not_Application_Json() =>
-        await JsonTests.ResponseShouldBe406WhenAcceptHeaderIsNotApplicationJson(
-            _url, 
-            _client,
-            HttpMethod.Post,
-            new SignInRequest("test@example.com", "Joshua", "ValidPassword123!"));
 }

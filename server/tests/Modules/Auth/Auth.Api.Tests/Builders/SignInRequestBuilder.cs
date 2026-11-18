@@ -12,5 +12,9 @@ public class SignInRequestBuilder
     public SignInRequestBuilder WithPassword(string password) { _password = password; return this; }
     public SignInRequestBuilder WithName(string name) { _name = name; return this; }
 
-    public SignInRequest Build() => new SignInRequest(Email: _email, Name: _name, Password: _password);
+    public SignInRequest Build() => new SignInRequest {
+        Email = _email, 
+        Name = _name, 
+        Password = _password
+    };
 }

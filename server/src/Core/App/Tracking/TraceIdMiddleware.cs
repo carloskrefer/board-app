@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
 
-namespace Board.App.Middleware;
+namespace Board.App.Tracking;
 
 public static class TraceIdConstants
 {

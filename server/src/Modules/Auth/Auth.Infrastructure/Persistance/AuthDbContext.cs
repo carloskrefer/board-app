@@ -35,7 +35,7 @@ public class AuthDbContext : DbContext, IAuthUnitOfWork
         }
         catch (DbUpdateConcurrencyException)
         {
-            return UnitOfWorkErrors.OptimisticConcurrency;
+            return OptimisticUnitOfWorkErrors.UpdateConcurrency;
         }
     }
 

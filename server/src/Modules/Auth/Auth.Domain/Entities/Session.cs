@@ -25,4 +25,10 @@ public class Session
             User = user
         };
     }
+
+    internal void Revoke()
+    {
+        if (RevokedAt is not null)
+            RevokedAt = DateTime.UtcNow;
+    }
 }

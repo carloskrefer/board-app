@@ -8,34 +8,26 @@ namespace Auth.Application.Commands;
 public record SignInCommand(string Email, string Name, string Password);
 public record SignInOutput(Guid UserId);
 
-public class SignInCommandHandler : IHandler<SignInCommand, Result<SignInOutput>>
+public class SignInCommandHandler(
+    IUserRepository userRepository,
+    IAuthUnitOfWork unitOfWork,
+    IPasswordHasher passwordHasher) : IHandler<SignInCommand, Result<SignInOutput>>
 {
-    private readonly IUserRepository _userRepository;
-    private readonly IAuthUnitOfWork _unitOfWork;
-    private readonly IPasswordHasher _passwordHasher;
-
-    public SignInCommandHandler(IUserRepository userRepository, IAuthUnitOfWork unitOfWork, IPasswordHasher passwordHasher)
+    public async Task<Result<SignInOutput>> HandleAsync(SignInCommand command, CancellationToken ct)
     {
-        _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        _passwordHasher = passwordHasher ?? throw new ArgumentNullException(nameof(passwordHasher));
-    }
-
-    public async Task<Result<SignInOutput>> HandleAsync(SignInCommand input, CancellationToken ct)
-    {
-        var userResult = input.ToUser(_passwordHasher);
+        var userResult = command.ToUser(passwordHasher);
 
         if (userResult.IsFailure)
             return userResult.Error;
 
         var user = userResult.Value;
 
-        if (await _userRepository.IsEmailRegisteredAsync(user.Email, ct))
+        if (await userRepository.IsEmailRegisteredAsync(user.Email, ct))
             return UserErrors.EmailAlreadyExists;
 
-        await _userRepository.CreateUserAsync(user, ct);
+        await userRepository.CreateUserAsync(user, ct);
         
-        var commitResult = await _unitOfWork.CommitAsync([user], ct);
+        var commitResult = await unitOfWork.CommitAsync([user], ct);
 
         if (commitResult.IsFailure)
             return commitResult.Error;

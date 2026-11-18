@@ -57,23 +57,43 @@ public class User
 
         return session;
     }
+
+    public Result LogOut(Guid sessionId)
+    {
+        var session = _sessions.FirstOrDefault(s => s.Id == sessionId);        
+
+        if (session is not null)
+            session.Revoke();
+
+        return Result.Success();
+    }
 }
 
 public static class UserErrors
 {
     public static readonly string Id = "USER";
-    public static readonly Error EmailAlreadyExists = 
+    public static readonly Error EmailAlreadyExists =
         new(
-            $"{Id}.EMAIL_ALREADY_EXISTS", 
+            $"{Id}.EMAIL_ALREADY_EXISTS",
             "An user with the provided email already exists.");
 
-    public static readonly Error NotFound = 
+    public static readonly Error EmailNotFound =
         new(
-            $"{Id}.USER_NOT_FOUND", 
+            $"{Id}.EMAIL_NOT_FOUND",
             "An user with the provided email was not found.");
+
+    public static readonly Error IdNotFound =
+        new(
+            $"{Id}.ID_NOT_FOUND",
+            "An user with the provided id was not found.");
+
+    public static readonly Error SessionNotFound =
+        new(
+            $"{Id}.SESSION_NOT_FOUND",
+            "The user session was not found.");
 
     public static readonly Error IncorrectPassword = // TODO: Rename to PasswordIncorrect
         new(
-            $"{Id}.INCORRECT_PASSWORD", 
+            $"{Id}.INCORRECT_PASSWORD",
             "The provided password is incorrect.");
 }

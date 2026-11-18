@@ -36,6 +36,9 @@ coverage.*
 !.vscode/tasks.json
 !.vscode/launch.json
 
+# Visual Studio
+.vs/
+
 # OS files
 .DS_Store
 Thumbs.db
