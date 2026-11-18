@@ -63,13 +63,28 @@ internal static class AddSwaggerExtensions
         Description = "Board App Server API for managing boards, tasks, and users.",
     };
 
-    private static void AddSecurityDefinition(SwaggerGenOptions options) =>
-        options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    private static void AddSecurityDefinition(SwaggerGenOptions options)
+    {
+        AddBearerSecurityDefinition(options);
+        AddRefreshTokenSecurityDefinition(options);
+    }
+
+    private static void AddBearerSecurityDefinition(SwaggerGenOptions options) =>
+        options.AddSecurityDefinition("AccessToken", new OpenApiSecurityScheme
         {
-            Description = "Please enter a valid JWT Access Token",
             Type = SecuritySchemeType.Http,
+            Description = "Access Token (JWT)",
             Scheme = "bearer",
             BearerFormat = "JWT",
+        });
+
+    private static void AddRefreshTokenSecurityDefinition(SwaggerGenOptions options) =>
+        options.AddSecurityDefinition("RefreshToken", new OpenApiSecurityScheme
+        {
+            Type = SecuritySchemeType.ApiKey,
+            Description = "Refresh Token (Session Id)",
+            Name = "refreshToken",
+            In = ParameterLocation.Cookie,
         });
 
     private static void AddServer(SwaggerGenOptions options) =>
