@@ -32,7 +32,7 @@ public class UserController(
     /// </summary>
     [HttpPost]
     [ProducesResponseType<SignInResponse>(StatusCodes.Status201Created)]
-    public async Task<IActionResult> SignIn([FromBody] SignInRequest? request, CancellationToken ct)
+    public async Task<IActionResult> SignIn([FromBody] SignInRequest? request, CancellationToken ct = default)
     {
         if (!request.Validate(out var errors))
             return problemResultFactory.CreateBadRequest(errors);
@@ -67,7 +67,7 @@ public class UserController(
         required: true
     )]
     [ProducesResponseType<LogInResponse>(StatusCodes.Status200OK)]
-    public async Task<IActionResult> LogIn([FromBody] LogInRequest request, CancellationToken ct)
+    public async Task<IActionResult> LogIn([FromBody] LogInRequest? request, CancellationToken ct = default)
     {
         if (!request.Validate(out var errors))
             return problemResultFactory.CreateBadRequest(errors);
@@ -94,7 +94,7 @@ public class UserController(
     /// </summary>
     [HttpPost("logout")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> LogOut(CancellationToken ct)
+    public async Task<IActionResult> LogOut(CancellationToken ct = default)
     {
         var command = new LogOutCommand(
             UserId: User.GetSub(),

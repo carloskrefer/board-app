@@ -29,7 +29,7 @@ public class LogInValidator(LogInRequest? request) : CompositeValidator
 public static class LogInValidatorExtensions
 {
     public static bool Validate(
-        [NotNullWhen(true)] this LogInRequest request, 
+        [NotNullWhen(true)] this LogInRequest? request, 
         out IReadOnlyList<DetailedApiError> errors)
     {
         return new LogInValidator(request).Validate(out errors);
