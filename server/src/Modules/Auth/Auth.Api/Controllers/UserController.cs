@@ -4,6 +4,7 @@ using Auth.Api.Validators;
 using Auth.Application.Commands;
 using Contracts.Auth;
 using Core.Api;
+using Core.Api.Authentication;
 using Core.Api.OpenApi;
 using Core.Api.OpenApi.Attributes;
 using Core.Api.Validation;
@@ -86,6 +87,7 @@ public class UserController(
     }
 
     // TODO: Check if there is a parameter for the cookie. Even if not, this needs to be documented for OpenAPI.    
+    // TODO: Add tests to logout
 
     /// <summary>
     /// Logs user out and invalidates the current session.
@@ -94,10 +96,9 @@ public class UserController(
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> LogOut(CancellationToken ct)
     {
-        // TODO: Check if I should create Get methods for these 2
         var command = new LogOutCommand(
-            UserId: Guid.Parse(User.FindFirst("sub")?.Value ?? throw new InvalidOperationException("User ID not found in claims.")),
-            SessionId: Guid.Parse(Request.Cookies["refreshToken"] ?? throw new InvalidOperationException("Refresh token cookie not found.")));
+            UserId: User.GetSub(),
+            SessionId: Request.Cookies.GetRefreshToken());
 
         var result = await logOutCommandHandler.HandleAsync(command, ct);
 
