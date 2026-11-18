@@ -93,6 +93,18 @@ public class UserController(
     /// Logs user out and invalidates the current session.
     /// </summary>
     [HttpPost("logout")]
+    [SetCookie(
+        whenStatusCode: StatusCodes.Status204NoContent,
+        key: "refreshToken", // TODO: Store this constant somewhere, it repeated a bunch of times already.
+        value: "<sessionId>",
+        description: "Removes the Refresh Token Cookie as user is logging out.",
+        isHttpOnly: true,
+        isSecure: true,
+        sameSiteMode: Microsoft.Net.Http.Headers.SameSiteMode.Lax,
+        maxAge: 0,
+        path: "/api/users",
+        required: true
+    )]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> LogOut(CancellationToken ct = default)
     {

@@ -14,6 +14,7 @@ public class SetCookieAttribute : Attribute
     public SameSiteMode SameSiteMode { get; }
     public string? Path { get; }
     public int DaysExpiration { get; }
+    public int MaxAge { get; }
     public bool Required { get; }
     public bool Deprecated { get; }
 
@@ -26,6 +27,7 @@ public class SetCookieAttribute : Attribute
         bool isSecure = false,
         SameSiteMode sameSiteMode = SameSiteMode.Lax,
         int daysExpiration = -1,
+        int maxAge = -1,
         string? path = null,
         bool required = false,
         bool deprecated = false)
@@ -38,6 +40,7 @@ public class SetCookieAttribute : Attribute
         IsSecure = isSecure;
         SameSiteMode = sameSiteMode;
         DaysExpiration = daysExpiration;
+        MaxAge = maxAge;
         Path = path;
         Required = required;
         Deprecated = deprecated;
@@ -58,6 +61,9 @@ public class SetCookieAttribute : Attribute
 
         if (DaysExpiration >= 0)
             cookieParts.Add($"Expires=<date-after-{DaysExpiration}-days>");
+
+        if (MaxAge >= 0)
+            cookieParts.Add($"Max-Age={MaxAge}");
 
         if (!string.IsNullOrEmpty(Path))
             cookieParts.Add($"Path={Path}");
