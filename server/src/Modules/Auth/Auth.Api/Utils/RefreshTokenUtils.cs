@@ -6,20 +6,28 @@ public static class RefreshTokenUtils
 {
     public static readonly string key = "refreshToken";
 
-    public static void AddRefreshTokenCookie(this IResponseCookies cookies, Guid sessionId)
+    public static void AddRefreshTokenCookie(this IResponseCookies cookies, Guid sessionId, string path)
     {
-        cookies.Append(key, sessionId.ToString(), new CookieOptions
+        cookies.Append(
+            key: key, 
+            value: sessionId.ToString(), 
+            options: CreateRefreshTokenCookieOptions(path));
+    }
+
+    private static CookieOptions CreateRefreshTokenCookieOptions(string path) => 
+        new()
         {
             HttpOnly = true,
             // Secure = true, // TODO: I think this should be enabled in production, test latter whenever HTTPs is working
             SameSite = SameSiteMode.Lax,
-            Path = "/api/users",
+            Path = path,
             Expires = DateTime.UtcNow.AddDays(7)
-        });
-    }
+        };
 
-    public static void DeleteRefreshTokenCookie(this IResponseCookies cookies)
+    public static void DeleteRefreshTokenCookie(this IResponseCookies cookies, string path)
     {
-        cookies.Delete(key);
+        cookies.Delete(
+            key: key,
+            options: CreateRefreshTokenCookieOptions(path));
     }
 }

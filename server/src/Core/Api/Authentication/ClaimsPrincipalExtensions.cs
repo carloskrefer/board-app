@@ -6,11 +6,10 @@ public static class ClaimsPrincipalExtensions
 {
     public static Guid GetSub(this ClaimsPrincipal principal)
     {
-        var sub = principal.FindFirst("sub")?.Value;
+        var sub = principal.FindFirstValue(ClaimTypes.NameIdentifier);
         
-        if (sub is null)
-            throw new InvalidOperationException("Sub not found in claims.");
-        
-        return Guid.Parse(sub);
+        Guid.TryParse(sub, out var result);
+
+        return result;
     }
 }

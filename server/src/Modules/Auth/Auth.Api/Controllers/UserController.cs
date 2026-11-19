@@ -8,24 +8,31 @@ using Core.Api.Authentication;
 using Core.Api.OpenApi;
 using Core.Api.OpenApi.Attributes;
 using Core.Api.Validation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Auth.Api.Controllers;
 
+public static class Constants
+{
+    public const string Route = "/api/users";
+}
+
+
 [ApiController]
 [Tags(Tags.Auth)]
-[Route("/api/users")]
+[Route(Constants.Route)]
 public class UserController(
     IHandler<SignInCommand, Result<SignInOutput>> signInCommandHandler,
     IHandler<LogInCommand, Result<LogInOutput>> logInCommandHandler,
     IHandler<LogOutCommand, Result<LogOutOutput>> logOutCommandHandler,
     ProblemResultFactory2 problemResultFactory) : ControllerBase
 {
-    // TODO: Fazer os outros serem "?" também os outros requests.
-    // TODO: Anotar num architectural decision sobre essa escolha de desativar a validação automática do model state,
-    // pq o sign in request é tudo "?" os objetos...
     // TODO: rewrite tests considering the null values and stuff.
+    // TODO: Ver documento de Bearer e conferir se retorna WWW-Authenticate certinho (https://docs.google.com/document/d/1gWZDYVYuD-INXb6p__qleR9w7NBCn-36no9V7lITh9Y/edit?tab=t.0)
+    // TODO: Rename app tests to Command prefixes, removing "use case" from name or namespace
+    // TODO: Find a prettier way to add decorators
 
     /// <summary>
     /// Registers a new user.
@@ -83,13 +90,14 @@ public class UserController(
         if (result.IsFailure)
             return result.Error.ToResponse(request, problemResultFactory);
 
-        HttpContext.Response.Cookies.AddRefreshTokenCookie(result.Value.SessionId);
+        HttpContext.Response.Cookies.AddRefreshTokenCookie(result.Value.SessionId, Constants.Route);
 
         return Ok(result.Value.ToLogInResponse());
     }
 
     // TODO: Check if there is a parameter for the cookie. Even if not, this needs to be documented for OpenAPI.    
     // TODO: Add tests to logout
+    // TODO: Check if it actually removes the cookie
 
     /// <summary>
     /// Logs user out and invalidates the current session.
@@ -119,7 +127,7 @@ public class UserController(
         if (result.IsFailure)
             return command.ToErrorResponse(HttpContext, ProblemDetailsFactory, result.Error);
 
-        HttpContext.Response.Cookies.DeleteRefreshTokenCookie();
+        HttpContext.Response.Cookies.DeleteRefreshTokenCookie(Constants.Route);
 
         return NoContent();
     }

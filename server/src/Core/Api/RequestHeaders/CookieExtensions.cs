@@ -8,9 +8,8 @@ public static class CookieExtensions
     {
         var cookie = cookies["refreshToken"];
 
-        if (cookie is null)
-            throw new InvalidOperationException("Cookie \"refreshToken\" not found.");
+        Guid.TryParse(cookie, out var result);
 
-        return Guid.Parse(cookie);
+        return result;
     }
 }
