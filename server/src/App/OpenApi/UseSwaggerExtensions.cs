@@ -13,6 +13,7 @@ internal static class UseSwaggerExtensions
             options.EnableDeepLinking();
             options.DefaultModelsExpandDepth(0);
             options.DisplayRequestDuration();
+            options.EnableTryItOutByDefault();
         });
     }
 }
