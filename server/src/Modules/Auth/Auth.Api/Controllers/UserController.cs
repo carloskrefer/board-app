@@ -103,6 +103,7 @@ public class UserController(
     /// Logs user out and invalidates the current session.
     /// </summary>
     [HttpPost("logout")]
+    [OperationSecurityRequirement(SecuritySchemeNames.AccessToken, SecuritySchemeNames.RefreshToken)]
     [SetCookie(
         whenStatusCode: StatusCodes.Status204NoContent,
         key: "refreshToken", // TODO: Store this constant somewhere, it repeated a bunch of times already.
