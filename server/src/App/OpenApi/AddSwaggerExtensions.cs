@@ -16,7 +16,7 @@ internal static class AddSwaggerExtensions
         {
             IncludeXmlComments(options);
             SwaggerDoc(options);
-            AddSecurityDefinition(options);
+            AddSecurity(options);
             AddServer(options);
             AddOperationFilters(options);
             AddDocumentFilters(options);
@@ -24,10 +24,24 @@ internal static class AddSwaggerExtensions
         });
     }
 
+    private static void AddSecurity(SwaggerGenOptions options)
+    {
+        AddSecurityDefinition(options);
+        AddSecurityRequirement(options);
+    }
+
+    private static void AddSecurityRequirement(SwaggerGenOptions options)
+    {
+        var requirement = CreateOpenApiSecurityRequirement();
+        options.AddSecurityRequirement(requirement);
+    }
+
     private static void AddOperationFilters(SwaggerGenOptions options)
     {
         options.OperationFilter<ProblemJsonOperationFilter>();
         options.OperationFilter<SetCookieOperationFilter>();
+        options.OperationFilter<OperationSecurityRequirementOperationFilter>();
+        options.OperationFilter<AllowAnonymousOperationFilter>();
     }
 
     private static void AddDocumentFilters(SwaggerGenOptions options)
@@ -69,8 +83,25 @@ internal static class AddSwaggerExtensions
         AddRefreshTokenSecurityDefinition(options);
     }
 
+    private static OpenApiSecurityRequirement CreateOpenApiSecurityRequirement()
+    {
+        var requirement = new OpenApiSecurityRequirement();
+        requirement[CreateAccessTokenSecuritySchemeReference()] = Array.Empty<string>();
+        return requirement;
+    }
+
+    private static OpenApiSecurityScheme CreateAccessTokenSecuritySchemeReference() =>
+        new()
+        {
+            Reference = new OpenApiReference
+            {
+                Type = ReferenceType.SecurityScheme,
+                Id = SecuritySchemeNames.AccessToken
+            }
+        };
+
     private static void AddBearerSecurityDefinition(SwaggerGenOptions options) =>
-        options.AddSecurityDefinition("AccessToken", new OpenApiSecurityScheme
+        options.AddSecurityDefinition(SecuritySchemeNames.AccessToken, new OpenApiSecurityScheme
         {
             Type = SecuritySchemeType.Http,
             Description = "Access Token (JWT)",
@@ -79,7 +110,7 @@ internal static class AddSwaggerExtensions
         });
 
     private static void AddRefreshTokenSecurityDefinition(SwaggerGenOptions options) =>
-        options.AddSecurityDefinition("RefreshToken", new OpenApiSecurityScheme
+        options.AddSecurityDefinition(SecuritySchemeNames.RefreshToken, new OpenApiSecurityScheme
         {
             Type = SecuritySchemeType.ApiKey,
             Description = "Refresh Token (Session Id)",
