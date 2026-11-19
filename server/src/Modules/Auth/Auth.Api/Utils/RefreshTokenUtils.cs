@@ -1,15 +1,14 @@
+using Core.Api.Authentication;
 using Microsoft.AspNetCore.Http;
 
 namespace Auth.Api.Utils;
 
 public static class RefreshTokenUtils
 {
-    public static readonly string key = "refreshToken";
-
     public static void AddRefreshTokenCookie(this IResponseCookies cookies, Guid sessionId, string path)
     {
         cookies.Append(
-            key: key, 
+            key: RefreshTokenConstants.CookieKey, 
             value: sessionId.ToString(), 
             options: CreateRefreshTokenCookieOptions(path));
     }
@@ -27,7 +26,7 @@ public static class RefreshTokenUtils
     public static void DeleteRefreshTokenCookie(this IResponseCookies cookies, string path)
     {
         cookies.Delete(
-            key: key,
+            key: RefreshTokenConstants.CookieKey,
             options: CreateRefreshTokenCookieOptions(path));
     }
 }

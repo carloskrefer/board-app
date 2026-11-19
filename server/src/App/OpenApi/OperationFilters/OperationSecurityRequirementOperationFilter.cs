@@ -1,11 +1,11 @@
 using System.Text.RegularExpressions;
 using Core.Api.OpenApi.Attributes;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace App.OpenApi.OperationFilters;
 
+// TODO: Review this code, even though it works
 public sealed class OperationSecurityRequirementOperationFilter : IOperationFilter
 {
     // name            -> anything except brackets, commas and whitespace

@@ -65,14 +65,14 @@ public class UserController(
     [AllowAnonymous]
     [SetCookie(
         whenStatusCode: StatusCodes.Status200OK,
-        key: "refreshToken",
+        key: RefreshTokenConstants.CookieKey,
         value: "<sessionId>",
         description: "Refresh token for maintaining user session.",
         isHttpOnly: true,
         isSecure: true,
         sameSiteMode: Microsoft.Net.Http.Headers.SameSiteMode.Lax,
         daysExpiration: 7,
-        path: "/api/users",
+        path: Constants.Route,
         required: true
     )]
     [ProducesResponseType<LogInResponse>(StatusCodes.Status200OK)]
@@ -106,14 +106,14 @@ public class UserController(
     [OperationSecurityRequirement(SecuritySchemeNames.AccessToken, SecuritySchemeNames.RefreshToken)]
     [SetCookie(
         whenStatusCode: StatusCodes.Status204NoContent,
-        key: "refreshToken", // TODO: Store this constant somewhere, it repeated a bunch of times already.
+        key: RefreshTokenConstants.CookieKey,
         value: "<sessionId>",
         description: "Removes the Refresh Token Cookie as user is logging out.",
         isHttpOnly: true,
         isSecure: true,
         sameSiteMode: Microsoft.Net.Http.Headers.SameSiteMode.Lax,
         maxAge: 0,
-        path: "/api/users",
+        path: Constants.Route,
         required: true
     )]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

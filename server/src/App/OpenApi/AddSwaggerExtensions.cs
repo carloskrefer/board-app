@@ -1,6 +1,7 @@
 using System.Reflection;
 using App.OpenApi.DocumentFilters;
 using App.OpenApi.OperationFilters;
+using Core.Api.Authentication;
 using Core.Api.OpenApi;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -114,7 +115,7 @@ internal static class AddSwaggerExtensions
         {
             Type = SecuritySchemeType.ApiKey,
             Description = "Refresh Token (Session Id)",
-            Name = "refreshToken",
+            Name = RefreshTokenConstants.CookieKey,
             In = ParameterLocation.Cookie,
         });
 
