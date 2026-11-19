@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 
 namespace App.Authentication;
@@ -7,23 +9,34 @@ public static class AddAuthenticationExtensions
     internal static void AddAuthentication(this WebApplicationBuilder builder)
     {
         builder.Services.AddAuthentication()
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = builder.Configuration.GetJwtIssuer(),
+            .AddJwtBearer(options => ConfigureJwtBearerOptions(options, builder));
 
-                    ValidateAudience = true,
-                    ValidAudience = builder.Configuration.GetJwtAudience(),
+        builder.Services.AddAuthorization(ConfigureAuthorizationOptions);
+    }
 
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = builder.Configuration.GetRsaSecurityKey(),
+    private static void ConfigureJwtBearerOptions(JwtBearerOptions options, WebApplicationBuilder builder)
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration.GetJwtIssuer(),
 
-                    ValidateLifetime = true
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration.GetJwtAudience(),
 
-                    // TODO: Tem outras configurações importantes de setar aqui, conferir e setar!
-                };
-            });
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = builder.Configuration.GetRsaSecurityKey(),
+
+            ValidateLifetime = true
+
+            // TODO: Tem outras configurações importantes de setar aqui, conferir e setar!
+        };
+    }
+
+    private static void ConfigureAuthorizationOptions(AuthorizationOptions options)
+    {
+        options.FallbackPolicy = new AuthorizationPolicyBuilder()
+            .RequireAuthenticatedUser()
+            .Build();
     }
 }

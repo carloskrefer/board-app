@@ -31,6 +31,7 @@ public class UserController(
     /// Registers a new user.
     /// </summary>
     [HttpPost]
+    [AllowAnonymous]
     [ProducesResponseType<SignInResponse>(StatusCodes.Status201Created)]
     public async Task<IActionResult> SignIn([FromBody] SignInRequest? request, CancellationToken ct = default)
     {
@@ -54,6 +55,7 @@ public class UserController(
     /// Logs user in with the provided credentials.
     /// </summary>
     [HttpPost("login")]
+    [AllowAnonymous]
     [SetCookie(
         whenStatusCode: StatusCodes.Status200OK,
         key: "refreshToken",
