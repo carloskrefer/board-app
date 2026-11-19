@@ -5,7 +5,7 @@ using Auth.Domain.ValueObjects;
 using Auth.Application.Tests.Builders.Commands;
 using Microsoft.EntityFrameworkCore;
 
-namespace Auth.Application.Tests.UseCases;
+namespace Auth.Application.Tests.Commands;
 
 public class SignInCommandHandlerTests
 {

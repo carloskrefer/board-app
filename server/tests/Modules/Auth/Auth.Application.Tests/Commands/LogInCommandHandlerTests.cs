@@ -7,7 +7,7 @@ using Auth.Application.Commands;
 using Auth.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
-namespace Auth.Application.Tests.UseCases;
+namespace Auth.Application.Tests.Commands;
 
 public class LogInCommandHandlerTests
 {
