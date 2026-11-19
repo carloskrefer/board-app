@@ -70,6 +70,13 @@ public static class BadRequestAssertions
         IEnumerable<DetailedApiError> expectedErrors,
         IEnumerable<DetailedApiError> actualErrors)
     {
-        Assert.True(expectedErrors.Order().SequenceEqual(actualErrors.Order()));
+        var expectedOrdered = Order(expectedErrors);
+        var actualOrdered = Order(actualErrors);
+        Assert.True(expectedOrdered.SequenceEqual(actualOrdered));
+    }
+
+    private static IEnumerable<DetailedApiError> Order(IEnumerable<DetailedApiError> errors)
+    {
+        return errors.OrderBy(e => e.Field).ThenBy(e => e.Code).ThenBy(e => e.RejectedValue);
     }
 }

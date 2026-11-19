@@ -143,6 +143,27 @@ public class LogInTests : DefaultIntegrationTests<AuthDbContext>
     }
 
     [Fact]
+    public async Task Should_Respond_With_400_And_Null_Value_Error_For_Each_Field_When_There_Is_No_Request_Body()
+    {
+        var response = await _client.PostAsync(_loginUrl, null);
+
+        List<DetailedApiError> expectedErrors = [
+            new(
+                generalError: NullResponseErrors.NullValue,
+                field: nameof(LogInRequest.Email).FromPascalCaseToCamelCase(),
+                location: ErrorLocation.Body,
+                rejectedValue: null),
+            new(
+                generalError: NullResponseErrors.NullValue,
+                field: nameof(LogInRequest.Password).FromPascalCaseToCamelCase(),
+                location: ErrorLocation.Body,
+                rejectedValue: null)
+        ];
+
+        await BadRequestAssertions.AssertResponse(response, _loginUrl, expectedErrors);
+    }
+
+    [Fact]
     public async Task Should_Respond_With_409_Conflict_When_Concurrency_Error_Happens()
     {
         var signInRequest = new SignInRequestBuilder().Build();

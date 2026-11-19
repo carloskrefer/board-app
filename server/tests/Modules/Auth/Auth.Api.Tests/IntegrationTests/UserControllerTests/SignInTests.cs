@@ -275,6 +275,32 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
     }
 
     [Fact]
+    public async Task Should_Respond_With_400_And_Null_Value_Error_For_Each_Field_When_There_Is_No_Request_Body()
+    {
+        var response = await _client.PostAsync(_url, null);
+
+        List<DetailedApiError> expectedErrors = [
+            new(
+                generalError: NullResponseErrors.NullValue,
+                field: nameof(SignInRequest.Email).FromPascalCaseToCamelCase(),
+                location: ErrorLocation.Body,
+                rejectedValue: null),
+            new(
+                generalError: NullResponseErrors.NullValue,
+                field: nameof(SignInRequest.Password).FromPascalCaseToCamelCase(),
+                location: ErrorLocation.Body,
+                rejectedValue: null),
+            new(
+                generalError: NullResponseErrors.NullValue,
+                field: nameof(SignInRequest.Name).FromPascalCaseToCamelCase(),
+                location: ErrorLocation.Body,
+                rejectedValue: null)
+        ];
+
+        await BadRequestAssertions.AssertResponse(response, _url, expectedErrors);
+    }
+
+    [Fact]
     public async Task Should_Respond_With_BadRequest_When_Password_Contains_No_Numbers()
     {
         var requestBody = new SignInRequest
