@@ -5,7 +5,7 @@ namespace Core.Infrastructure.Resilience;
 public class RetryDecorator<TInput, TOutput, TOutputValue> : IHandler<TInput, TOutput>
     where TOutput : Result<TOutputValue>
 {
-    private const int MaxAttempts = 3;
+    private int MaxAttempts { get; }
     private static readonly TimeSpan BaseDelay = TimeSpan.FromMilliseconds(100);
 
     private readonly IHandler<TInput, TOutput> _handler;
@@ -18,12 +18,14 @@ public class RetryDecorator<TInput, TOutput, TOutputValue> : IHandler<TInput, TO
         ILogger<RetryDecorator<TInput, TOutput, TOutputValue>> logger,
         IHandler<TInput, TOutput> handler,
         string handlerName,
-        Func<Exception, bool> isRetryable)
+        Func<Exception, bool> isRetryable,
+        int maxAttempts = 3)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _handler = handler ?? throw new ArgumentNullException(nameof(handler));
         _handlerName = handlerName ?? throw new ArgumentNullException(nameof(handlerName));
         _isRetryable = isRetryable ?? throw new ArgumentNullException(nameof(isRetryable));
+        MaxAttempts = maxAttempts;
     }
 
     public async Task<TOutput> HandleAsync(TInput input, CancellationToken ct)

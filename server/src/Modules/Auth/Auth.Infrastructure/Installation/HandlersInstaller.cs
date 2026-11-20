@@ -20,14 +20,20 @@ public static class HandlersInstaller
     {
         services.AddScoped<SignInCommandHandler>();
 
-        // TODO: Check if there is not a more "clean looking" way to do decoration, maybe with an extension or something
         services.AddScoped(sp => {
             var handler = sp.GetRequiredService<SignInCommandHandler>();
+            var handlerName = "Sign In";
 
-            return handler.DecorateWithLogger<SignInCommandHandler, SignInCommand, SignInOutput>(
-                sp, 
-                HandlerLoggingProjections.SignInCommand, 
-                "Sign In");
+            return handler
+                .DecorateWithRetrier<SignInCommandHandler, SignInCommand, SignInOutput>(
+                    sp,
+                    ex => ex is DbUpdateException,
+                    handlerName,
+                    2)
+                .DecorateWithLogger<SignInCommandHandler, SignInCommand, SignInOutput>(
+                    sp, 
+                    HandlerLoggingProjections.SignInCommand, 
+                    handlerName);
         });
     }
 

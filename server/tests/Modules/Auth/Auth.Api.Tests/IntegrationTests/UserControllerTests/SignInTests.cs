@@ -10,6 +10,10 @@ using Core.String.Extensions;
 using TestsCommon.Assertions;
 using Contracts.Auth;
 using System.Net;
+using Auth.Api.Tests.Builders;
+using Auth.Api.Tests.Mocks;
+using Auth.Application.Interfaces;
+using TestsCommon.Auth.Mocks;
 
 namespace Auth.Api.Tests.IntegrationTests.UserControllerTests;
 
@@ -317,6 +321,49 @@ public class SignInTests : DefaultIntegrationTests<AuthDbContext>
                 field: nameof(requestBody.Password).FromPascalCaseToCamelCase(),
                 location: ErrorLocation.Body,
                 rejectedValue: null)
+        ];
+
+        await BadRequestAssertions.AssertResponse(response, _url, expectedErrors);
+    }
+
+    [Fact]
+    public async Task Should_Respond_With_Bad_Request_When_Another_User_Signs_With_Same_Email_Concurrently()
+    {
+        var unitOfWorkMock = new AuthUnitOfWorkMock()
+        {
+            CommitAsyncHandler = (_, _) => throw new DbUpdateException()
+        };
+        
+        var repository = new UserRepositoryMock();
+
+        repository.IsEmailRegisteredAsyncHandler = (_, _) => 
+        {
+            if (repository.Tracker.GetCallCount(nameof(repository.IsEmailRegisteredAsync)) == 1)
+                return Task.FromResult(false);
+
+            return Task.FromResult(true);
+        };
+
+        using var customFactory = 
+            _factory.WithWebHostBuilder(whb =>
+                whb.ConfigureServices(sc => 
+                {
+                    sc.AddScoped<IAuthUnitOfWork>(sp => unitOfWorkMock);
+                    sc.AddScoped<IUserRepository>(sp => repository);
+                }
+            ));
+
+        using var customClient = customFactory.CreateClient();
+        var body = new SignInRequestBuilder().Build();
+
+        var response = await customClient.PostAsJsonAsync(_url, body);
+
+        List<DetailedApiError> expectedErrors = [
+            new(
+                generalError: SignInResponseErrors.EmailAlreadyRegistered(body.Email!),
+                field: nameof(body.Email).FromPascalCaseToCamelCase(),
+                location: ErrorLocation.Body,
+                rejectedValue: body.Email)
         ];
 
         await BadRequestAssertions.AssertResponse(response, _url, expectedErrors);

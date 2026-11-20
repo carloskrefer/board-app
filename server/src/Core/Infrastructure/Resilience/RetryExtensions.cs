@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -11,7 +10,8 @@ public static class ILoggerExtensions
         this IHandler<TInput, Result<TOutput>> handler,
         IServiceProvider provider,
         Func<Exception, bool> isRetryable,
-        string handlerName
+        string handlerName,
+        int maxAttempts = 3
     )
         where THandler : IHandler<TInput, Result<TOutput>>
     {
@@ -24,6 +24,7 @@ public static class ILoggerExtensions
             logger,
             handler,
             handlerName,
-            isRetryable);
+            isRetryable,
+            maxAttempts);
     }
 }
